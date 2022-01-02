@@ -28,3 +28,8 @@ std::string strtrim(std::string &str){
 	}
 	return str;
 }
+
+void set_time(float seconds, struct timespec &tm){
+	tm.tv_sec = static_cast<int>(seconds);
+	tm.tv_nsec = (seconds - tm.tv_sec) * 1000000000;
+}

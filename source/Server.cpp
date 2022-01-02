@@ -5,6 +5,9 @@ Server :: Server(char **argv){
 	_port = 6667;
 	if (!parseConfig(argv))
 		throw(ErrorException("ERROR CONFIG FILE PARSING"));
+	_event_list = new struct kevent[1];
+	bzero(_event_list, sizeof(struct kevent));
+	_event_list_num = 1;
 }
 
 bool Server:: parseConfig(char **argv){
@@ -76,11 +79,67 @@ void Server :: run(){
 	if (listen(_sockFd, 50) == -1) {
 		throw(ErrorException(strerror(errno)));
 	}
+	if ((_kevFd = kqueue()) == -1){
+		throw(ErrorException(strerror(errno)));
+	}
+	EV_SET(_event_list, _sockFd, EVFILT_READ, EV_ADD | EV_CLEAR, 0, 0, NULL);
+	if (kevent(_kevFd, _event_list, 1, NULL, 0, NULL) == -1){
+		throw(ErrorException(strerror(errno)));
+	}
+	
+}
+
+bool Server::accept_new_client(){
+	struct sockaddr_in sockaddr;
+	socklen_t socklen = sizeof(sockaddr);
+	struct kevent kv = {0};
+	int cl_socket = 0;
+
+
+	if ((cl_socket = accept(_sockFd, (struct sockaddr*)&sockaddr,&socklen)) == -1){
+		return (false);
+	}
+	if (fcntl(cl_socket, F_SETFL, O_NONBLOCK) == -1) {
+		return (false);
+	}
+	EV_SET(&kv, cl_socket, EVFILT_READ, EV_ADD | EV_CLEAR, 0 , 0, nullptr); //last arg must send to client object
+	if (kevent(_kevFd, &kv, 1, NULL, 0, NULL) == -1){
+		return (false);
+	}
+	_event_list_num += 1;
+	delete[] _event_list;
+	_event_list = new struct kevent[_event_list_num];
+	return true;
 }
 
 void Server::startLoop(void){
-	int kevFd;
-	if ((kevFd = kqueue()) == -1)
-		throw(ErrorException(strerror(errno)));
-	
+	int res = -2;
+	uint8_t errors = 0;
+	while (1){
+		struct timespec timeout = {0};
+		set_time(1.05, timeout);
+		res = kevent(_kevFd, nullptr, 0, _event_list, _event_list_num, &timeout);
+		while (res > 0){
+			int x = EVFILT_WRITE;
+			if (_event_list[res - 1].ident == _sockFd){
+				accept_new_client();
+			}
+			else if (_event_list[res - 1].flags & EV_EOF){
+				(void) 2;//disconnect client
+			}
+			else if (_event_list[res - 1].filter == EVFILT_READ){
+				(void)1; //read client
+			}
+			else if (_event_list[res - 1].filter == EVFILT_WRITE){
+				(void)1; //write to client
+			}
+			res--;
+		}
+		if (res == -1){
+			errors++;
+			std::cerr << "Kevent error #" << errors << std::endl;
+			if (errors == 100)
+				throw(ErrorException("Too many kevent errors, dropping down"));
+		}
+	}
 }

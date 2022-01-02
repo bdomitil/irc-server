@@ -27,4 +27,5 @@ private:
 std::string getValue(std::string &str);
 std::string getKey(std::string &str);
 std::string strtrim(std::string &str);
+void set_time(float seconds, struct timespec &tm);
 #endif

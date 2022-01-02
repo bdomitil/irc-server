@@ -17,7 +17,7 @@ private:
 	int								_kevFd;
 	std::map <std::string, std::string> _operators;
 	bool							parseConfig(char **argv);
-	bool							accept_new_client();
+	Users							*accept_new_client();
 	Server();
 
 public:

@@ -5,6 +5,10 @@
 
 #include "cpp-libs.hpp"
 #include "Server.hpp"
+#include "Users.hpp"
+#include "Channels.hpp"
+typedef std::map<std::string, Users> users_map;
+typedef std::map<std::string, Channels> channels_map;
 class ErrorException : public std::exception {
 
 public :

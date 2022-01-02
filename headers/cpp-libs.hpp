@@ -19,5 +19,6 @@
 #include <sstream>
 #include <ctime>
 #include <unistd.h>
+#include <bitset>
 
 #endif

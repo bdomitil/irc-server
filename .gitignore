@@ -33,4 +33,5 @@
 # Custom
 *test*
 *.dSYM
-
+*vscode
+irc-server

@@ -1,6 +1,6 @@
 NAME =	irc-server
 
-SRCS =	
+SRCS =	source/Server.cpp source/tools.cpp
 
 MAIN =	main.cpp
 
@@ -10,7 +10,7 @@ OBJS_DIR = objs
 ALL_OBJS_DIRS = $(sort $(dir $(OBJS)))
 
 CC = clang++ -g
-FLAGS = -Wall -Wextra -Werror -std=c++98
+# FLAGS = -Wall -Wextra -Werror -std=c++98
 
 #colors for beauty
 YELLOW =	\033[33;1m

@@ -12,12 +12,9 @@ private:
 	std::string						_ip;
 	int								_sockFd;
 	std::string						_password;
-	struct kevent					*_event_list;
-	uint32_t						_event_list_num;
-	int								_kevFd;
 	std::map <std::string, std::string> _operators;
 	bool							parseConfig(char **argv);
-	Users							*accept_new_client();
+	Users							*accept_new_user(t_event &event);
 	Server();
 
 public:

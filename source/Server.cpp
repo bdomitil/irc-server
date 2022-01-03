@@ -5,9 +5,6 @@ Server :: Server(char **argv){
 	_port = 6667;
 	if (!parseConfig(argv))
 		throw(ErrorException("ERROR CONFIG FILE PARSING"));
-	_event_list = new struct kevent[1];
-	bzero(_event_list, sizeof(struct kevent));
-	_event_list_num = 1;
 }
 
 bool Server:: parseConfig(char **argv){
@@ -79,20 +76,11 @@ void Server :: run(){
 	if (listen(_sockFd, 50) == -1) {
 		throw(ErrorException(strerror(errno)));
 	}
-	if ((_kevFd = kqueue()) == -1){
-		throw(ErrorException(strerror(errno)));
-	}
-	EV_SET(_event_list, _sockFd, EVFILT_READ, EV_ADD | EV_CLEAR, 0, 0, NULL);
-	if (kevent(_kevFd, _event_list, 1, NULL, 0, NULL) == -1){
-		throw(ErrorException(strerror(errno)));
-	}
-	
 }
 
-Users *Server::accept_new_client(){
+Users *Server::accept_new_user(t_event &event){
 	struct sockaddr_in sockaddr;
 	socklen_t socklen = sizeof(sockaddr);
-	struct kevent kv = {0};
 	int cl_socket = 0;
 
 	if ((cl_socket = accept(_sockFd, (struct sockaddr*)&sockaddr,&socklen)) == -1){
@@ -101,41 +89,43 @@ Users *Server::accept_new_client(){
 	if (fcntl(cl_socket, F_SETFL, O_NONBLOCK) == -1) {
 		return (nullptr);
 	}
-	Users *new_User = new Users(std::string(inet_ntoa(sockaddr.sin_addr)));
-	EV_SET(&kv, cl_socket, EVFILT_READ, EV_ADD | EV_CLEAR, 0 , 0, (void*)new_User);
-	if (kevent(_kevFd, &kv, 1, NULL, 0, NULL) == -1){
-		return (nullptr);
-	}
-	_event_list_num += 1;
-	delete[] _event_list;
-	_event_list = new struct kevent[_event_list_num];
+	Users *new_User = new Users(cl_socket, &event);
+	new_User->setHostip(std::string(inet_ntoa(sockaddr.sin_addr)));
 	return new_User;
 }
 
 void Server::startLoop(void){
+	users_map users;
+	channels_map channels;
+	t_event event;
+
 	int res = -2;
-	uint8_t errors = 0;
-	users_map Users;
-	channels_map Channels;
+	int errors = 0;
+	struct kevent *event_list;
+	Users *user = nullptr;
+
+
+	event.addReadEvent(_sockFd, this);
 	while (1){
-		struct timespec timeout = {0};
-		set_time(1.5, timeout);
-		res = kevent(_kevFd, nullptr, 0, _event_list, _event_list_num, &timeout);
+		event.update();
+		res = event.proc(&event_list);
 		while (res > 0){
-			int x = EVFILT_WRITE;
-			if (_event_list[res - 1].ident == _sockFd){
-				accept_new_client();
+			if (event_list[res - 1].ident == _sockFd){
+				if (!(user = accept_new_user(event)))
+					std::cerr << "ERROR ACCEPTING NEW CONNECTION; PROBLEM :\n" << strerror(errno) << std::endl;
 			}
-			else if (_event_list[res - 1].flags & EV_EOF){
-				(void) 2;//disconnect user
+			else if (event_list[res - 1].flags & EV_EOF){
+				user = static_cast < Users*>(event_list[res - 1].udata);
+				close(user->getSocket());
+				users.erase(user->getNick());
 			}
-			else if (_event_list[res - 1].filter == EVFILT_READ){
-				(void)1; //read user
-				(void)2; //exec command
+			else if (event_list[res - 1].filter == EVFILT_READ){
+				user = static_cast < Users*>(event_list[res - 1].udata);
+				user->getMessage(event_list[res - 1].data);
 			}
-			else if (_event_list[res - 1].filter == EVFILT_WRITE){
-				(void)1; //write to user
-				(void)2; //reply to user
+			else if (event_list[res - 1].filter == EVFILT_WRITE){
+				user = static_cast < Users*>(event_list[res - 1].udata);
+				user->sendMessage(users, channels);
 			}
 			res--;
 		}

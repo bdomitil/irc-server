@@ -89,35 +89,37 @@ void Server :: run(){
 	
 }
 
-bool Server::accept_new_client(){
+Users *Server::accept_new_client(){
 	struct sockaddr_in sockaddr;
 	socklen_t socklen = sizeof(sockaddr);
 	struct kevent kv = {0};
 	int cl_socket = 0;
 
-
 	if ((cl_socket = accept(_sockFd, (struct sockaddr*)&sockaddr,&socklen)) == -1){
-		return (false);
+		return (nullptr);
 	}
 	if (fcntl(cl_socket, F_SETFL, O_NONBLOCK) == -1) {
-		return (false);
+		return (nullptr);
 	}
-	EV_SET(&kv, cl_socket, EVFILT_READ, EV_ADD | EV_CLEAR, 0 , 0, nullptr); //last arg must send to client object
+	Users *new_User = new Users(std::string(inet_ntoa(sockaddr.sin_addr)));
+	EV_SET(&kv, cl_socket, EVFILT_READ, EV_ADD | EV_CLEAR, 0 , 0, (void*)new_User);
 	if (kevent(_kevFd, &kv, 1, NULL, 0, NULL) == -1){
-		return (false);
+		return (nullptr);
 	}
 	_event_list_num += 1;
 	delete[] _event_list;
 	_event_list = new struct kevent[_event_list_num];
-	return true;
+	return new_User;
 }
 
 void Server::startLoop(void){
 	int res = -2;
 	uint8_t errors = 0;
+	users_map Users;
+	channels_map Channels;
 	while (1){
 		struct timespec timeout = {0};
-		set_time(1.05, timeout);
+		set_time(1.5, timeout);
 		res = kevent(_kevFd, nullptr, 0, _event_list, _event_list_num, &timeout);
 		while (res > 0){
 			int x = EVFILT_WRITE;
@@ -125,13 +127,15 @@ void Server::startLoop(void){
 				accept_new_client();
 			}
 			else if (_event_list[res - 1].flags & EV_EOF){
-				(void) 2;//disconnect client
+				(void) 2;//disconnect user
 			}
 			else if (_event_list[res - 1].filter == EVFILT_READ){
-				(void)1; //read client
+				(void)1; //read user
+				(void)2; //exec command
 			}
 			else if (_event_list[res - 1].filter == EVFILT_WRITE){
-				(void)1; //write to client
+				(void)1; //write to user
+				(void)2; //reply to user
 			}
 			res--;
 		}

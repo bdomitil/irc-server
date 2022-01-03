@@ -1,6 +1,6 @@
 NAME =	irc-server
 
-SRCS =	source/Server.cpp source/tools.cpp
+SRCS =	source/Server.cpp source/tools.cpp source/Users.cpp source/Command.cpp
 
 MAIN =	main.cpp
 

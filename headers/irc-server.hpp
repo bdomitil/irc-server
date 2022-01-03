@@ -2,15 +2,25 @@
 #define IRC_SERVER_HPP
 
 #define CONFIG_FILE "server.yaml"
-
+#define CR "\r"
+#define LF "\n"
+#define MESSAGE_BUFFER_SIZE 512
 #include "cpp-libs.hpp"
-#include "Server.hpp"
-#include "Users.hpp"
-#include "Channels.hpp"
-#include "Command.hpp"
 
-typedef std::map<std::string, Users> users_map;
-typedef std::map<std::string, Channels> channels_map;
+class Users;
+class Channels;
+class Server;
+class Command;
+typedef std::map<std::string, Users*> users_map;
+typedef std::map<std::string, Channels*> channels_map;
+
+#include "event.hpp"
+#include "Buffer.hpp"
+#include "Command.hpp"
+#include "Channels.hpp"
+#include "Users.hpp"
+#include "Server.hpp"
+
 class ErrorException : public std::exception {
 
 public :

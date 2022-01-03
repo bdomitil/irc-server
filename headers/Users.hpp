@@ -16,7 +16,9 @@ private:
 	std::string		_nick;
 	std::bitset<4>	_operations;
 	bool			_isAuth;
-	bool			_isIRCoperator;	
+	bool			_isIRCoperator;
+	Command			_command;
+	
 public:
 	Users(std::string host_ip);
 	bool	isAuth(void){return _isAuth;}

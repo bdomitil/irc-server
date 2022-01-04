@@ -10,13 +10,18 @@
 class Users;
 class Channels;
 class Server;
-class Command;
+class Message;
 typedef std::map<std::string, Users*> users_map;
 typedef std::map<std::string, Channels*> channels_map;
+std::string	strtrim(std::string &str);
+std::string	cutPrefix(std::string &text);
+int			getArgs(std::string &text, std::vector<std::string> &arg_store);
+
 
 #include "event.hpp"
-#include "Buffer.hpp"
 #include "Command.hpp"
+#include "Buffer.hpp"
+#include "Message.hpp"
 #include "Channels.hpp"
 #include "Users.hpp"
 #include "Server.hpp"

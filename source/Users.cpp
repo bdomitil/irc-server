@@ -6,7 +6,6 @@ Users::Users(int fd){
 	_socket = fd;
 	_isAuth = false;
 	_isIRCoperator = false;
-	_passwd = false;
 }
 
 Users::Users(int fd, t_event *event){
@@ -25,23 +24,38 @@ void Users::reset(){
 	_host_ip.clear();
 	_operations.reset();
 	_nick.clear();
-	_passwd = false;
+	_passwd.clear(); 
 }
 
-void Users::auth(){
-
-	
+bool Users::auth(std::string passw){
+	if (_apasswd.size() && _realname.size() && _nick.size())
+	{
+		_isAuth = true;
+		return true;
+	}
+	return false;
 }
 
 
 void Users::getMessage(uint64_t readsize){
-	command.readMessage(_socket, readsize);
-	if (command.isRead()){
-		_event->disableReadEvent(_socket, this);
+	message.readMessage(_socket, readsize);
+	if (message.isRead()){
+		std::cout << message.getMessage() << std::endl;
 		_event->enableWriteEvent(_socket, this);
 	}
 }
 
-void Users::sendMessage(users_map &users_map, channels_map &channels_map){
+void Users::sendMessage(users_map &users_map, channels_map &channels_map, std::string &passw){
+	std::vector<std::string>&store = message._buffer.getStore();
+	std::vector<std::string>::iterator i  = store.begin();
+	while (i != store.end()){
+		message.exec(users_map, channels_map, this);
+	if (!_isAuth)
+		if (auth(passw))
+			users_map.insert(std::pair<std::string, Users*>(_nick, this));
+
+		store.erase(i);
+		std::vector<std::string>::iterator i  = store.begin();
+	}
 	
 }

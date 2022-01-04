@@ -1,23 +1,68 @@
 #ifndef IRC_COMMAND_HPP
 #define IRC_COMMAND_HPP
-
 #include "irc-server.hpp"
 
-class Command{
-
-private:
-	Buffer<MESSAGE_BUFFER_SIZE>	_buffer;
-	bool						_isRead;
-	std::string					_message;
-	uint32_t					_args;
-	std::string 				_prefix;
+class command_base{
+protected:
+		std::string					prefix;
+		uint32_t					num_args;
+		uint32_t					maxArgs;
+		std::vector<std::string>	args;
+		std::string					reply;
+		int							error;
 
 public:
-	void			readMessage(int fd);
-	void			readMessage(int fd, uint64_t readsize);
-	bool			isRead(){return _isRead;}
-	void			exec(users_map &users_map, channels_map &channels_map);
-	Command();
+		virtual std::string exec(users_map &users_map, channels_map &channels_map, void *parent) = 0;
+		std::string getReply(){return reply;}
+		command_base(std::string text);
+		command_base();
 };
+
+
+//#############################################//
+
+
+class commNick : public command_base{
+
+	public:
+		commNick(std::string text);
+		std::string exec(users_map &users_map, channels_map &channels_map, void *parent);
+};
+
+
+//#############################################//
+class commNotFound : public command_base{
+
+	public:
+		commNotFound(std::string text);
+		std::string exec(users_map &users_map, channels_map &channels_map, void *parent);
+};
+
+
+//#############################################//
+class commNonAuth : public command_base{
+	
+	public:
+		commNonAuth(std::string text);
+		std::string exec(users_map &users_map, channels_map &channels_map, void *parent);
+};
+
+//#############################################//
+
+class commPass : public command_base{
+
+	public:
+		commPass(std::string text);
+		std::string exec(users_map &users_map, channels_map &channels_map, void *parent);
+};
+
+class commUser : public command_base{
+
+	public:
+		commUser(std::string text);
+		std::string exec(users_map &users_map, channels_map &channels_map, void *parent);
+};
+
+
 
 #endif

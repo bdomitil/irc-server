@@ -12,14 +12,15 @@ typedef int buff_status;
 template  <int x>
 class Buffer{
 private: 
-		char		*_store;
-		buff_status	_status;
-		int 		_readSize;
-		uint64_t	_len;
+		char						*_buff;
+		std::vector<std::string>	_store;
+		buff_status					_status;
+		int 						_readSize;
+		uint64_t					_len;
 public:
 		Buffer(int readSize) {
 			try{
-				_store = new char[x];
+				_buff = new char[x];
 			}
 			catch(std::exception &e){
 				std::cerr << e.what()<< std::endl;
@@ -28,10 +29,9 @@ public:
 			_readSize = readSize;
 			_len = 0;
 		}
-		uint64_t size(){return _len;}
 		Buffer() {
 			try{
-				_store = new char[x];
+				_buff = new char[x];
 			}
 			catch(std::exception &e){
 				std::cerr << e.what()<< std::endl;
@@ -42,33 +42,34 @@ public:
 		}
 		
 		void reset(){
-			memset(_store, 0, _len);
+			memset(_buff, 0, _len);
 			_len = 0;
 			_status = BUFF_AVAIL;
 		}
 
 		bool checkEnd(){
-			char *pos = nullptr;
 			uint64_t i = 0;
+			uint64_t pos = 0;
 			while (i < _len){
-				if ((_store[i] == '\r' && _store[i + 1] == '\n') ||
-				(_store[i] == '\n' && _store[i + 1] == '\0'))
-					pos = &(_store[i]);
+				if ((_buff[i] == '\r' && _buff[i + 1] == '\n') ||
+				(_buff[i] == '\n' && _buff[i + 1] == '\0')){
+					std::string tmp(strndup(&(_buff[pos]), i - pos));
+					strtrim(tmp);
+					if (tmp.size())
+						_store.insert(_store.end(), tmp);
+					pos = i + 1;
+				}
 				i++;
 			}
 			if (!pos)
 				return false;
-			int q = _len - i;
-			int w = pos - _store;
-			pos += 2;
-			bzero(pos, _len - i);
+			bzero(&(_buff[pos]), _len - pos);
 			return true;
 		}
-		char *getStore(){return _store;}
 
 		void readFromSocket(int socket, uint64_t readSize){
 			int res = -2;
-			res = recv(socket, &(_store[_len]), readSize, 0);
+			res = recv(socket, &(_buff[_len]), readSize, 0);
 			if (res == -1)
 				throw BUFF_ERROR;
 			_len += res;
@@ -82,7 +83,7 @@ public:
 
 		void readFromSocket(int socket){
 			int res = -2;
-			res = recv(socket, _store, _readSize, 0);
+			res = recv(socket, _buff, _readSize, 0);
 			if (res == -1)
 				throw BUFF_ERROR;
 			_len += res;
@@ -93,9 +94,10 @@ public:
 				throw BUFF_FULL;
 			}
 		}
+
 		void readFromFd(int socket){
 			int res = -2;
-			res = read(socket, _store, _readSize);
+			res = read(socket, _buff, _readSize);
 			if (res == -1)
 				throw BUFF_ERROR;
 			_len += res;
@@ -106,9 +108,10 @@ public:
 				throw BUFF_FULL;
 			}
 		}
+
 		void readFromFd(int socket, uint64_t readSize){
 			int res = -2;
-			res = read(socket, _store, readSize);
+			res = read(socket, _buff, readSize);
 			if (res == -1)
 				throw BUFF_ERROR;
 			_len += res;
@@ -119,9 +122,15 @@ public:
 				throw BUFF_FULL;
 			}
 		}
+
 		~Buffer(){
-			delete [] _store;
+			delete [] _buff;
+			
 		}
+
+		std::vector<std::string> &getStore(){return _store;}
+		char *getBuff(void){return _buff;}
+		uint64_t size(){return _len;}
 
 };
 

@@ -1,6 +1,7 @@
 #ifndef IRCSERVER_HPP
 #define IRCSERVER_HPP
 #include "irc-server.hpp"
+#define SERVER_NAME "IRC-19-25-21"
 
 struct configFile{
 };

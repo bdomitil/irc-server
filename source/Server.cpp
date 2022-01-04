@@ -91,6 +91,7 @@ Users *Server::accept_new_user(t_event &event){
 	}
 	Users *new_User = new Users(cl_socket, &event);
 	new_User->setHostip(std::string(inet_ntoa(sockaddr.sin_addr)));
+	new_User->setPass(_password);
 	return new_User;
 }
 
@@ -112,7 +113,7 @@ void Server::startLoop(void){
 		while (res > 0){
 			if (event_list[res - 1].ident == _sockFd){
 				if (!(user = accept_new_user(event)))
-					std::cerr << "ERROR ACCEPTING NEW CONNECTION; PROBLEM :\n" << strerror(errno) << std::endl;
+					std::cerr << "ERROR ACCEPTING NEW CONNECTION; PROBLEM :" << strerror(errno) << std::endl;
 			}
 			else if (event_list[res - 1].flags & EV_EOF){
 				user = static_cast < Users*>(event_list[res - 1].udata);
@@ -125,7 +126,7 @@ void Server::startLoop(void){
 			}
 			else if (event_list[res - 1].filter == EVFILT_WRITE){
 				user = static_cast < Users*>(event_list[res - 1].udata);
-				user->sendMessage(users, channels);
+				user->sendMessage(users, channels, _password);
 			}
 			res--;
 		}

@@ -43,17 +43,28 @@ command_base::command_base(std::string text){
 	error = false;
 }
 
+void command_base::reset(){
+	args.clear();
+	num_args = 0;
+	reply.clear();
+	error  = 0;
+	prefix.clear();
+}
 
 //#############################################//
 
 
-std::string commNick::exec(users_map &users_map, channels_map &channels_map, void *parent){
+std::string commNick::exec(users_map &users, channels_map &channels_map, void *parent){
 	Users *user = (Users*)parent;
+	if (!user)
+		return ("");
 	if (args.size() != 2){
+		reply = makeErrorMsg("NICK", 461 );
 		error = 461;
 		throw this;
 	}
-	else if (users_map.find(args[2]) != users_map.end()){
+	else if (users.find(args[1]) != users.end()){
+		reply = makeErrorMsg("NICK", 433);
 		error = 433;
 		throw this;
 	}
@@ -72,10 +83,8 @@ commNick::commNick(std::string text): command_base(text) {
 commNotFound::commNotFound(std::string text): command_base(text) {
 }
 
-std::string commNotFound::exec(users_map &users_map, channels_map &channels_map, void *parent){
-	std::cerr << "COMMAND NOT FOUND" << std::endl;
-
-
+std::string commNotFound::exec(users_map &users, channels_map &channels_map, void *parent){
+	reply = makeErrorMsg(args[0], 421);
 	return ("");
 }
 //##################################################//
@@ -86,9 +95,8 @@ commNonAuth::commNonAuth(std::string text): command_base(text) {
 }
 
 
-std::string commNonAuth::exec(users_map &users_map, channels_map &channels_map, void *parent){
-	std::cerr << "NOT AUTHINTICATED" << std::endl;
-
+std::string commNonAuth::exec(users_map &users, channels_map &channels_map, void *parent){
+	reply = makeErrorMsg("AUTH", 451);
 	return "";
 }
 
@@ -98,14 +106,18 @@ commPass::commPass(std::string text): command_base(text) {
 }
 
 
-std::string commPass::exec(users_map &users_map, channels_map &channels_map, void *parent){
+std::string commPass::exec(users_map &users, channels_map &channels_map, void *parent){
 	
 	Users *user = (Users*)parent;
+	if (!user)
+		return ("");
 	if (args.size() != 2){
+		reply = makeErrorMsg("PASS", 461 );
 		error = 461;
 		throw this;
 	}
 	else if (user->getPasswd() != args[1]){
+		reply = makeErrorMsg("PASS", 464);
 		error = 464;
 		throw this;
 	}
@@ -120,18 +132,65 @@ commUser::commUser(std::string text): command_base(text) {
 }
 
 
-std::string commUser::exec(users_map &users_map, channels_map &channels_map, void *parent){
+std::string commUser::exec(users_map &users, channels_map &channels_map, void *parent){
 	
 	Users *user = (Users*)parent;
+	if (!user)
+		return ("");;
 	if (args.size() != 5){
+		reply = makeErrorMsg("USER", 461 );
 		error = 461;
 		throw this;
 	}
-	else{ 
+	else{
 		user->setName(args[1]);
 		user->setHostname(args[2]);
 		user->setServername(args[3]);
 		user->setRealname(args[4]);
 	}
+	return "";
+}
+
+
+//#############################################//
+
+commPong::commPong(std::string text): command_base(text) {
+}
+
+
+std::string commPong::exec(users_map &users, channels_map &channels_map, void *parent){
+	Users *user = (Users*)parent;
+	if (!user)
+		return ("");
+	if (num_args != 2)
+		reply = makeErrorMsg("PING", 461);
+	else
+		reply = "PONG " SERVER_NAME "\n";
+	return "";
+}
+
+
+//#############################################//
+
+commPrivMsg::commPrivMsg(std::string text): command_base(text) {
+
+
+}
+
+
+std::string commPrivMsg::exec(users_map &users, channels_map &channels_map, void *parent){
+	Users *user = (Users*)parent;
+	if (!user)
+		return ("");
+	users_map :: iterator f = users.find(args[1]);
+	if (num_args != 3)
+		reply = makeErrorMsg("PRIVMSG", 461);
+	else if (f == users.end())
+		reply = makeErrorMsg("PRIVMSG", 444);
+	else if ( f->second != user)
+		users[args[1]]->writeMessage( ":" +user->getNick() + "!" + user->getName()+ "@" + user->gethostIp() + " PRIVMSG " + args[1] + " :" + args[2]);
+	else if ( f->second == user)
+		reply = ( ":" +user->getNick() + "!" + user->getName()+ "@" + user->gethostIp() + " PRIVMSG " + args[1] + " :" + args[2] + CR LF) ;
+
 	return "";
 }

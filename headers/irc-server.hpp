@@ -5,6 +5,7 @@
 #define CR "\r"
 #define LF "\n"
 #define MESSAGE_BUFFER_SIZE 512
+#define MESSAGE_SEND_SIZE	2048
 #include "cpp-libs.hpp"
 
 class Users;
@@ -48,5 +49,8 @@ private:
 std::string getValue(std::string &str);
 std::string getKey(std::string &str);
 std::string strtrim(std::string &str);
+std::string getMOTD(std::string &target);
 void set_time(float seconds, struct timespec &tm);
+command_base *genCommand(std::string text, bool auth);
+std::string makeErrorMsg(std::string info, int error);
 #endif

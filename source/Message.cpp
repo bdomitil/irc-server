@@ -1,10 +1,22 @@
 #include "../headers/irc-server.hpp"
 
 Message::Message(){
-
+	_isRead = false;
+	_isSend = true;
+	_message.clear();
+	_command = nullptr;
 }
 
-void Message::readMessage(int fd){
+void Message::reset(){
+	_isRead = false;
+	_isSend = true;
+	_message.clear();
+	if (_command)
+		delete _command;
+	_command = nullptr;
+}
+
+void Message::readM(int fd){
 	try{
 		_buffer.readFromSocket(fd);
 	}
@@ -24,14 +36,14 @@ void Message::readMessage(int fd){
 	}
 }
 
-void Message::readMessage(int fd, uint64_t readsize){
+void Message::readM(int fd, uint64_t readsize){
 	try{
 		_buffer.readFromSocket(fd, readsize);
 	}
 	catch (buff_status &e){
 		if (e == BUFF_FULL){
 			_isRead = true;
-			_buffer.getStore();
+			_buffer.reset();
 		}
 		else if (e == BUFF_ERROR){
 			std::cerr << "ERROR FILLING MESSAGE BUFFER" << std::endl;
@@ -44,37 +56,47 @@ void Message::readMessage(int fd, uint64_t readsize){
 	}
 }
 
-std::string Message::getMessage(){
-	return ("tmpmessage");
+void Message::sendM(int fd, uint64_t writesize){
+	if (_message.size()){
+		if (writesize > _message.size())
+			writesize = _message.size();
+		uint64_t res = send(fd, _message.c_str(), writesize, 0);
+		if (res > 0){
+			_message.erase(0, res);
+			if (_message.size()){
+				_isSend = false;
+				return ;
+			}
+		}
+	}
+	reset();
 }
 
-command_base *genCommand(std::string text, bool auth){
-	std::vector<std::string> tmpV;
-	std::string command = text;
-	cutPrefix(command);
-	getArgs(command, tmpV);
-	command  = *tmpV.begin();
-
-	if (auth){
-		(void)2;
+void Message::sendM(int fd){
+	uint64_t writesize = MESSAGE_SEND_SIZE;
+	if (writesize > _message.size())
+			writesize = _message.size();
+	if (_message.size()) {
+		uint64_t res = send(fd, _message.c_str(), MESSAGE_SEND_SIZE, 0);
+		if (res > 0){
+			_message.erase(0, res);
+			if (_message.size()){
+				_isSend = false;
+				return ;
+			}
+		}
 	}
-	else{
-		if (command == "NICK")
-			return new commNick(text);
-		else if (command == "PASS")
-			return new commPass(text);
-		else if (command == "USER")
-			return new commUser(text);
-		return new commNonAuth(text);
-	}
-	return (new commNotFound(text));
+	reset();
 }
+
 
 void Message::exec(users_map &users_map, channels_map &channels_map, void *parent){
 	Users *user = (Users*)parent;
 	try{
-		command_base *command = genCommand(_buffer.getStore()[0], user->isAuth());
-		command->exec(users_map, channels_map, parent);
+		if (!_command)
+			_command = genCommand(_buffer.getStore()[0], user->isAuth());
+		_command->exec(users_map, channels_map, parent);
+		_message += _command->getReply();
 	}
 	catch (command_base *e){
 		_message =  e->getReply();

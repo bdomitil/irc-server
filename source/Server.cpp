@@ -126,7 +126,7 @@ void Server::startLoop(void){
 			}
 			else if (event_list[res - 1].filter == EVFILT_WRITE){
 				user = static_cast < Users*>(event_list[res - 1].udata);
-				user->sendMessage(users, channels, _password);
+				user->sendMessage(users, channels, event_list[res - 1].data);
 			}
 			res--;
 		}

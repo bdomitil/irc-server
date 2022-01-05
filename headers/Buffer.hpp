@@ -53,7 +53,9 @@ public:
 			while (i < _len){
 				if ((_buff[i] == '\r' && _buff[i + 1] == '\n') ||
 				(_buff[i] == '\n' && _buff[i + 1] == '\0')){
-					std::string tmp(strndup(&(_buff[pos]), i - pos));
+					char *tmpstr = strndup(&(_buff[pos]), i - pos);
+					std::string tmp(tmpstr);
+					delete tmpstr;
 					strtrim(tmp);
 					if (tmp.size())
 						_store.insert(_store.end(), tmp);

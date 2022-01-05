@@ -3,8 +3,8 @@
 t_event::t_event(){
 	 event_list = new struct kevent[1];
 	bzero(event_list, sizeof(struct kevent));
-	len = 1;
-	update_len = 1;
+	len = 0;
+	update_len = 0;
 	if ((fd = kqueue()) == -1){
 		throw(ErrorException(strerror(errno)));
 	}

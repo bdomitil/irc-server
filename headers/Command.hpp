@@ -16,6 +16,9 @@ public:
 		std::string getReply(){return reply;}
 		command_base(std::string text);
 		command_base();
+		int	getError(void){return error;}
+		virtual ~command_base(){ };
+		void reset();
 };
 
 
@@ -28,6 +31,7 @@ class commNick : public command_base{
 		commNick(std::string text);
 		std::string exec(users_map &users_map, channels_map &channels_map, void *parent);
 };
+
 
 
 //#############################################//
@@ -56,12 +60,37 @@ class commPass : public command_base{
 		std::string exec(users_map &users_map, channels_map &channels_map, void *parent);
 };
 
+//#############################################//
+
+
 class commUser : public command_base{
 
 	public:
 		commUser(std::string text);
 		std::string exec(users_map &users_map, channels_map &channels_map, void *parent);
 };
+
+//#############################################//
+
+
+class commPong : public command_base{
+
+	public:
+		commPong(std::string text);
+		std::string exec(users_map &users_map, channels_map &channels_map, void *parent);
+};
+
+
+//#############################################//
+
+
+class commPrivMsg : public command_base{
+
+	public:
+		commPrivMsg(std::string text);
+		std::string exec(users_map &users_map, channels_map &channels_map, void *parent);
+};
+
 
 
 

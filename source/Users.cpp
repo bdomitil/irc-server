@@ -24,7 +24,7 @@ void Users::reset(){
 	_host_ip.clear();
 	_operations.reset();
 	_nick.clear();
-	_passwd.clear(); 
+	_apasswd.clear(); 
 }
 
 bool Users::auth(){

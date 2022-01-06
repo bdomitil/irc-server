@@ -8,6 +8,7 @@
 #define MESSAGE_SEND_SIZE	2048
 #include "cpp-libs.hpp"
 
+
 class Users;
 class Channels;
 class Server;

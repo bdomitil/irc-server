@@ -60,6 +60,10 @@ command_base *genCommand(std::string text, bool auth){
 			return new commPong(text);
 		else if (command == "PRIVMSG")
 			return new commPrivMsg(text);
+		else if (command == "OPER")
+			return new commOper(text);
+		else if (command == "MODE")
+			return new commMode(text);
 	}
 	else{
 		if (command == "NICK")
@@ -102,6 +106,7 @@ std::string makeErrorMsg(std::string info, int error){
 		Errors.insert(std::pair<int, std::string> (481,  ":Permission Denied- You're not an IRC operator"    "\n"     )  );
 		Errors.insert(std::pair<int, std::string> (482,  " :You're not channel operator"    "\n"     )  );
 		Errors.insert(std::pair<int, std::string> (501,  " :Unknown MODE flag"    "\n"     )  );
+		Errors.insert(std::pair<int, std::string> (502,  " :Cant change mode for other users"    "\n"     )  );
 	}
 	std::map<int, std::string> :: iterator f = Errors.find(error);
 	if (f != Errors.end()){

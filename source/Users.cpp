@@ -2,14 +2,14 @@
 #include "../headers/irc-server.hpp"
 
 Users::Users(int fd){
-	_operations.reset();
+	_flags.reset();
 	_socket = fd;
 	_isAuth = false;
 	_isIRCoperator = false;
 }
 
 Users::Users(int fd, t_event *event){
-	_operations.reset();
+	_flags.reset();
 	_socket = fd;
 	_isAuth = false;
 	_isIRCoperator = false;
@@ -22,7 +22,7 @@ Users::Users(int fd, t_event *event){
 void Users::reset(){
 	_isAuth = false;
 	_host_ip.clear();
-	_operations.reset();
+	_flags.reset();
 	_nick.clear();
 	_apasswd.clear(); 
 }
@@ -67,9 +67,7 @@ void Users::sendMessage(users_map &users_map, channels_map &channels_map, uint64
 }
 
 void Users::writeMessage(std::string text){
-	_hasMessage = true;
 	std::vector<std::string>&store = message._buffer.getStore();
 	store.insert(store.end(), text + CR LF);
-	// message.setMessage(text + CR LF);
 	_event->enableWriteEvent(_socket, this);
 }

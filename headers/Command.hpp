@@ -90,6 +90,26 @@ class commPrivMsg : public command_base{
 		std::string exec(users_map &users_map, channels_map &channels_map, void *parent);
 };
 
+//#############################################//
+
+
+class commOper : public command_base{
+
+	public:
+		commOper(std::string text);
+		std::string exec(users_map &users_map, channels_map &channels_map, void *parent);
+};
+
+//#############################################//
+
+
+class commMode : public command_base{
+
+	public:
+		commMode(std::string text);
+		std::string exec(users_map &users_map, channels_map &channels_map, void *parent);
+};
+
 
 
 #endif

@@ -1,4 +1,5 @@
 #include "../headers/irc-server.hpp"
+std::map <std::string, std::string> *g_opers;
 
 Server :: Server(char **argv){
 	_ip = "0.0.0.0";
@@ -49,6 +50,7 @@ bool Server:: parseConfig(char **argv){
 					_ip = key;
 			}
 	}
+	g_opers = &_operators;
 	return true;
 }
 

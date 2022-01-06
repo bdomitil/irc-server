@@ -81,36 +81,36 @@ command_base *genCommand(std::string text, bool auth){
 std::string makeErrorMsg(std::string info, int error){
 	static std::map<int, std::string> Errors;
 	if (!Errors.size()){
-		Errors.insert(std::pair<int, std::string> (0, "UNKNOWN REPLY"   "\n"      )  );
-		Errors.insert(std::pair<int, std::string> (401,  " :No such nick/channel"    "\n"     )  );
-		Errors.insert(std::pair<int, std::string> (403,  " :No such channel"      "\n"   )  );
-		Errors.insert(std::pair<int, std::string> (404,  " :Cannot send to channel"     "\n"    )  );
-		Errors.insert(std::pair<int, std::string> (406,  " :There was no such nickname"    "\n"     )  );
-		Errors.insert(std::pair<int, std::string> (412, ":No text to send"   "\n"      )  );
-		Errors.insert(std::pair<int, std::string> (421, " :Unknown command"     "\n"    )  );
-		Errors.insert(std::pair<int, std::string> (431, ":No nickname given"    "\n"     )  );
-		Errors.insert(std::pair<int, std::string> (433, " :Nickname is already in use"    "\n"     )  );
-		Errors.insert(std::pair<int, std::string> (441, " :They aren't on that channel"     "\n"   )  );
-		Errors.insert(std::pair<int, std::string> (442, " :You're not on that channel"   "\n"      )  );
-		Errors.insert(std::pair<int, std::string> (443, " :is already on channel"      "\n"   )  );
-		Errors.insert(std::pair<int, std::string> (444, " :User not logged in"     "\n"    )  );
-		Errors.insert(std::pair<int, std::string> (451, ":You have not registered"      "\n"   )  );
-		Errors.insert(std::pair<int, std::string> (461, " :Not enough parameters"      "\n"   )  );
-		Errors.insert(std::pair<int, std::string> (464, ":Password incorrect"    "\n"     )  );
-		Errors.insert(std::pair<int, std::string> (467,  " :Channel key already set"      "\n"   )  );
-		Errors.insert(std::pair<int, std::string> (471,  " :Cannot join channel (+l)"      "\n"   )  );
-		Errors.insert(std::pair<int, std::string> (472,  " :is unknown mode char to me"    "\n"     )  );
-		Errors.insert(std::pair<int, std::string> (473,  " :Cannot join channel (+i)"      "\n"   )  );
-		Errors.insert(std::pair<int, std::string> (474,  " :Cannot join channel (+b)"      "\n"   )  );
-		Errors.insert(std::pair<int, std::string> (475,  " :Cannot join channel (+k)"     "\n"    )  );
-		Errors.insert(std::pair<int, std::string> (481,  ":Permission Denied- You're not an IRC operator"    "\n"     )  );
-		Errors.insert(std::pair<int, std::string> (482,  " :You're not channel operator"    "\n"     )  );
-		Errors.insert(std::pair<int, std::string> (501,  " :Unknown MODE flag"    "\n"     )  );
+		Errors.insert(std::pair<int, std::string> (0, "UNKNOWN REPLY"        )  );
+		Errors.insert(std::pair<int, std::string> (401,  " :No such nick/channel"        )  );
+		Errors.insert(std::pair<int, std::string> (403,  " :No such channel"        )  );
+		Errors.insert(std::pair<int, std::string> (404,  " :Cannot send to channel"        )  );
+		Errors.insert(std::pair<int, std::string> (406,  " :There was no such nickname"        )  );
+		Errors.insert(std::pair<int, std::string> (412, ":No text to send"        )  );
+		Errors.insert(std::pair<int, std::string> (421, " :Unknown command"        )  );
+		Errors.insert(std::pair<int, std::string> (431, ":No nickname given"        )  );
+		Errors.insert(std::pair<int, std::string> (433, " :Nickname is already in use"        )  );
+		Errors.insert(std::pair<int, std::string> (441, " :They aren't on that channel"       )  );
+		Errors.insert(std::pair<int, std::string> (442, " :You're not on that channel"        )  );
+		Errors.insert(std::pair<int, std::string> (443, " :is already on channel"        )  );
+		Errors.insert(std::pair<int, std::string> (444, " :User not logged in"        )  );
+		Errors.insert(std::pair<int, std::string> (451, ":You have not registered"        )  );
+		Errors.insert(std::pair<int, std::string> (461, " :Not enough parameters"        )  );
+		Errors.insert(std::pair<int, std::string> (464, ":Password incorrect"        )  );
+		Errors.insert(std::pair<int, std::string> (467,  " :Channel key already set"        )  );
+		Errors.insert(std::pair<int, std::string> (471,  " :Cannot join channel (+l)"        )  );
+		Errors.insert(std::pair<int, std::string> (472,  " :is unknown mode char to me"        )  );
+		Errors.insert(std::pair<int, std::string> (473,  " :Cannot join channel (+i)"        )  );
+		Errors.insert(std::pair<int, std::string> (474,  " :Cannot join channel (+b)"        )  );
+		Errors.insert(std::pair<int, std::string> (475,  " :Cannot join channel (+k)"        )  );
+		Errors.insert(std::pair<int, std::string> (481,  ":Permission Denied- You're not an IRC operator"        )  );
+		Errors.insert(std::pair<int, std::string> (482,  " :You're not channel operator"        )  );
+		Errors.insert(std::pair<int, std::string> (501,  " :Unknown MODE flag"        )  );
 		Errors.insert(std::pair<int, std::string> (502,  " :Cant change mode for other users"    "\n"     )  );
 	}
 	std::map<int, std::string> :: iterator f = Errors.find(error);
 	if (f != Errors.end()){
-		return ( info  + Errors[error]);
+		return ( info  + Errors[error] + CR LF);
 	}
 
 	return Errors[0];

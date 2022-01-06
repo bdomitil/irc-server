@@ -192,7 +192,7 @@ std::string commPrivMsg::exec(users_map &users, channels_map &channels_map, void
 	else if ( f->second != user)
 		users[args[1]]->writeMessage( ":" +user->getNick() + "!" + user->getName()+ "@" + user->gethostIp() + " PRIVMSG " + args[1] + " :" + args[2]);
 	else if ( f->second == user)
-		reply = ( ":" +user->getNick() + "!" + user->getName()+ "@" + user->gethostIp() + " PRIVMSG " + args[1] + " :" + args[2] + CR LF) ;
+		reply = prefix + " " + args[0] + " " + args[1] + " :" + args[2] + CR LF;
 
 	return "";
 }

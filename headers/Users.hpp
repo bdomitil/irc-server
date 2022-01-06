@@ -19,12 +19,10 @@ private:
 	std::string		_hostname;
 	std::string		_servername;
 	std::string		_name;
-	std::bitset<4>	_operations;
+	std::bitset<4>	_flags;
 	t_event			*_event;
 	Message			message;
 	bool			_isAuth;
-	bool			_isIRCoperator;
-	bool			_hasMessage;
 	
 public:
 	Users		(int fd, t_event *event);
@@ -36,14 +34,16 @@ public:
 	void		writeMessage(std::string text);
 
 public:
+	bool			_isIRCoperator;
 	bool		isAuth(void){return _isAuth;}
 	bool		isIRCoperator(void){return _isIRCoperator;}
-	bool		hasMessage(){return _hasMessage;}
+	void		makeIRCoperator(void){_isIRCoperator = true;}
 	int			&getSocket(void){return _socket;}
 	std::string	&getNick(void){return _nick;}
 	std::string &getPasswd(void){return _passwd;}
 	std::string &getName(void){return _name;}
 	std::string &gethostIp(void){return _host_ip;}
+	std::bitset<4> &getflags(){return _flags;};
 	void		setNick(std::string nick){_nick = nick;}
 	void		setPass(std::string pass){_passwd = pass;}
 	void		setaPass(std::string pass){_apasswd = pass;}

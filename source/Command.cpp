@@ -1,5 +1,7 @@
 #include "../headers/irc-server.hpp"
 
+extern std::map <std::string, std::string> *g_opers;
+
 std::string cutPrefix(std::string &text){
 	strtrim(text);
 	int i = 0;
@@ -191,6 +193,82 @@ std::string commPrivMsg::exec(users_map &users, channels_map &channels_map, void
 		users[args[1]]->writeMessage( ":" +user->getNick() + "!" + user->getName()+ "@" + user->gethostIp() + " PRIVMSG " + args[1] + " :" + args[2]);
 	else if ( f->second == user)
 		reply = ( ":" +user->getNick() + "!" + user->getName()+ "@" + user->gethostIp() + " PRIVMSG " + args[1] + " :" + args[2] + CR LF) ;
+
+	return "";
+}
+
+//#############################################//
+
+commOper::commOper(std::string text): command_base(text) {
+
+
+}
+
+
+std::string commOper::exec(users_map &users, channels_map &channels_map, void *parent){
+	Users *user = (Users*)parent;
+	if (!user)
+		return ("");
+	if (num_args != 3)
+		reply = makeErrorMsg("OPER", 461);
+	else if (g_opers->find(args[1]) != g_opers->end() && g_opers->find(args[1])->second == args[2])
+		user->makeIRCoperator();
+	else 
+		reply = makeErrorMsg("", 464 );
+
+	return "";
+}
+
+commMode::commMode(std::string text): command_base(text) {
+
+
+}
+
+
+std::string commMode::exec(users_map &users, channels_map &channels_map, void *parent){
+	Users *user = (Users*)parent;
+	if (!user)
+		return ("");
+	char type = args[1][0];
+	if (type == '#'){
+
+	}
+	else {
+		if (num_args != 3)
+			reply = makeErrorMsg("MODE", 461);
+		else if ((args[2][0] != '+' && args[2][0] != '-')  || args[2].size() != 2)
+			reply = makeErrorMsg("MODE", 501);
+		else if (args[1] != user->getNick())
+			reply = makeErrorMsg("MODE", 502);
+		std::bitset<4>&flags  = user->getflags();
+		if (args[2][0] == '+'){
+			if (args[2][1] == 's')
+				flags.set(U_S);
+			else if (args[2][1] == 'i')
+				flags.set(U_I);	
+			else if (args[2][1] == 'o')
+				(void)"do nothing";
+			else if (args[2][1] == 'w')
+				flags.set(U_W);
+			else
+				reply = makeErrorMsg("MODE", 501);
+		}	
+		else if (args[2][0] == '-'){
+			if (args[2][1] == 's')
+				flags.reset(U_S);
+			else if (args[2][1] == 'i')
+				flags.reset(U_I);	
+			else if (args[2][1] == 'o'){
+				flags.reset(U_O);
+				user->_isIRCoperator = false;
+			}
+			else if (args[2][1] == 'w')
+				flags.reset(U_W);
+			else
+				reply = makeErrorMsg("MODE", 501);
+		}
+	}
+
 
 	return "";
 }

@@ -74,6 +74,8 @@ command_base *genCommand(std::string text, bool auth){
 			return new commMode(text);
 		else if (command == "WHO")
 			return new commWho(text);
+		else if (command == "JOIN")
+			return new commJoin(text);
 	}
 	else{
 		if (command == "NICK")
@@ -134,4 +136,14 @@ std::string makeMessageHeader(Users *sender, std::string messageType, std::strin
 
 std::string makeReplyHeader(std::string senderNick, std::string receiver, int code){
 	return (":" + senderNick + " " + ft_itoa(code) + " " + receiver + " ");
+}
+
+
+std::time_t increase_session_time(){
+	time_t curr = std::time(0);
+	std::tm *tmp  = localtime(&curr);
+	tmp->tm_sec += SESSION_END_SEC;
+	tmp->tm_hour += 1;
+	curr = std::mktime(tmp);
+	return (curr);
 }

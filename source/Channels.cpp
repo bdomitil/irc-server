@@ -3,11 +3,13 @@
 Channels::Channels(std::string name, Users *user){
 	_owner = user;
 	_name = name;
-	addUser(user);
 	_size = 0;
 	_flags.reset();
 	_max_users = 0;
 	_isDead = false;
+	_users.reserve(100);
+	addUser(user);
+	makeOper(user);
 }
 
 void Channels::addUser(Users* user){
@@ -138,6 +140,47 @@ void Channels::writeToUsers(std::string text, Users *sender){
 			i->first->writeMessage(text);
 		i++;
 	}
+}
+
+std::string Channels::whoUsers(bool flag_O, bool flag_I, Users *user){
+	std::vector< std::pair<Users*, std::bitset<2> > > :: iterator i = _users.begin();
+	std::string result;
+	while (i < _users.end()){
+		char q;
+		if (i->first->isIRCoperator())
+			q = '*';
+		else if (isOper(i->first))
+			q = '@';
+		else 
+			q = ' ';
+		if (flag_O && flag_I){
+			if (!i->first->getflags().test(U_I) && isOper(i->first)){
+				result += makeReplyHeader(SERVER_NAME, user->getNick(), 352) \
+				+ getName() + " " + i->first->getName() + " "+  i->first->getHostname() + " " + \
+				+ SERVER_NAME " " + i->first->getNick() + " H" + q +  " :0 " + i->first->getRealName() + CR LF;
+			}
+		}
+		else if (flag_O){
+			if (isOper(i->first))
+				result += makeReplyHeader(SERVER_NAME, user->getNick(), 352) \
+				+ getName() + " " + i->first->getName() + " "+  i->first->getHostname() + " " + \
+				+ SERVER_NAME " " + i->first->getNick() + " H" + q +  " :0 " + i->first->getRealName() + CR LF;
+		}
+		else if (flag_I){
+			if (!i->first->getflags().test(U_I) && !isPart(user)){
+				result += makeReplyHeader(SERVER_NAME, user->getNick(), 352) \
+				+ getName() + " " + i->first->getName() + " "+  i->first->getHostname() + " " + \
+				+ SERVER_NAME " " + i->first->getNick() + " H" + q +  " :0 " + i->first->getRealName() + CR LF;
+			}
+		}
+		else{
+			result += makeReplyHeader(SERVER_NAME, user->getNick(), 352) \
+				+ getName() + " " + i->first->getName() + " "+  i->first->getHostname() + " " + \
+				+ SERVER_NAME " " + i->first->getNick() + " H" + q +  " :0 " + i->first->getRealName() + CR LF;
+		}
+		i++;
+	}
+	return result;
 }
 
 

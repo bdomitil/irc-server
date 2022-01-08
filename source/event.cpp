@@ -26,7 +26,7 @@ void t_event::update(){
 
 void t_event::addReadEvent(int socket, void *udata){
 	struct kevent kv = {0};
-	EV_SET(&kv, socket, EVFILT_READ, EV_ADD | EV_CLEAR, 0 , 0, udata);
+	EV_SET(&kv, socket, EVFILT_READ, EV_ADD, 0 , 0, udata);
 	if (kevent(fd, &kv, 1, NULL, 0, NULL) == -1){
 		std::cerr << "ERROR adding event for write" << std::endl;
 	}
@@ -35,7 +35,7 @@ void t_event::addReadEvent(int socket, void *udata){
 
 void t_event::addWriteEvent(int socket, void *udata){
 	struct kevent kv = {0};
-	EV_SET(&kv, socket, EVFILT_WRITE, EV_ADD | EV_CLEAR, 0 , 0, udata);
+	EV_SET(&kv, socket, EVFILT_WRITE, EV_ADD , 0 , 0, udata);
 	if (kevent(fd, &kv, 1, NULL, 0, NULL) == -1){
 		std::cerr << "ERROR adding event for write" << std::endl;
 	}

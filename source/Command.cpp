@@ -307,10 +307,34 @@ std::string commWho::exec(users_map &users, channels_map &channels_map, void *pa
 		throw this;
 		return "";
 	}
-	if (users.find(args[1]) != users.end() && !users[args[1]]->checkFlag(U_I)){
+	else if (num_args == 2  && args[1][0] == '#' ){
+		if (channels_map.find(args[1]) != channels_map.end())
+			reply = channels_map[args[1]]->whoUsers(false, false, user);
+	}
+	else if (num_args == 3 && args[1][0] == '#' && args[2] == "0"){
+		if (channels_map.find(args[1]) != channels_map.end())
+			reply = channels_map[args[1]]->whoUsers(true, false, user);
+	}
+	else if (num_args == 2 && args[2] == "o"){
+		if (channels_map.find(args[1]) != channels_map.end())
+			reply = channels_map[args[1]]->whoUsers(true, true, user);
+	}
+	else if (args[1] == "*"){
+		channels_map::iterator i = channels_map.begin();
+		while (i != channels_map.end()){
+			reply += i->second->whoUsers(false, true, user);
+			i++;
+		}
+	}
+	else if (users.find(args[1]) != users.end() ){
+		char q;
+		if (users[args[1]]->isIRCoperator())
+			q = '*';
+		else 
+			q = ' ';
 		reply = makeReplyHeader(SERVER_NAME, user->getNick(), 352) \
 			+ users[args[1]]->getName() + " "+  users[args[1]]->getHostname() + " " + \
-			 + SERVER_NAME " " + users[args[1]]->getNick() + " H :0 " + users[args[1]]->getRealName() + CR LF;
+			 + SERVER_NAME " " + users[args[1]]->getNick() + " H" + q +  " :0 " + users[args[1]]->getRealName() + CR LF;
 	}
 	reply += makeReplyHeader(SERVER_NAME, user->getNick(), 315) + user->getNick() + " :End of /WHO list" CR LF;
 	return "";

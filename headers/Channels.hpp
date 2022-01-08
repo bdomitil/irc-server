@@ -56,6 +56,7 @@ public:
 	void			dropBan(std::string nick);
 	bool			isBaned(std::string nick);
 	bool			isBaned(Users *user);
+	std::string		whoUsers(bool flag_O, bool flag_I, Users *user);
 	void			writeToUsers(std::string text, Users *user);
 	std::vector< std::pair<Users*, std::bitset<2> > > :: iterator find_user(Users *user);
 	std::vector< std::pair<Users*, std::bitset<2> > > :: iterator find_user(std::string nick);

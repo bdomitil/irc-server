@@ -87,6 +87,7 @@ commNotFound::commNotFound(std::string text): command_base(text) {
 
 std::string commNotFound::exec(users_map &users, channels_map &channels_map, void *parent){
 	reply = makeErrorMsg(args[0], 421);
+	std::cerr << reply << std::endl; //TODO debug
 	return ("");
 }
 //##################################################//
@@ -190,7 +191,7 @@ std::string commPrivMsg::exec(users_map &users, channels_map &channels_map, void
 	else if (f == users.end())
 		reply = makeErrorMsg("PRIVMSG", 444);
 	else if ( f->second != user)
-		users[args[1]]->writeMessage( ":" +user->getNick() + "!" + user->getName()+ "@" + user->gethostIp() + " PRIVMSG " + args[1] + " :" + args[2]);
+		users[args[1]]->writeMessage(makeMessageHeader(user, "PRIVMSG", args[1]) + args[2]);
 	else if ( f->second == user)
 		reply = prefix + " " + args[0] + " " + args[1] + " :" + args[2] + CR LF;
 
@@ -242,33 +243,68 @@ std::string commMode::exec(users_map &users, channels_map &channels_map, void *p
 			reply = makeErrorMsg("MODE", 502);
 		std::bitset<4>&flags  = user->getflags();
 		if (args[2][0] == '+'){
-			if (args[2][1] == 's')
+			if (args[2][1] == 's'){
 				flags.set(U_S);
-			else if (args[2][1] == 'i')
-				flags.set(U_I);	
-			else if (args[2][1] == 'o')
+			}
+			else if (args[2][1] == 'i'){
+				flags.set(U_I);
+			}
+			else if (args[2][1] == 'o'){
 				(void)"do nothing";
-			else if (args[2][1] == 'w')
+			}
+			else if (args[2][1] == 'w'){
 				flags.set(U_W);
+			}
 			else
 				reply = makeErrorMsg("MODE", 501);
+			if (!reply.size())
+				reply = makeMessageHeader(user, "MODE", user->getNick()) + "+" + args[2][1] + CR LF;
 		}	
 		else if (args[2][0] == '-'){
-			if (args[2][1] == 's')
+			if (args[2][1] == 's'){
 				flags.reset(U_S);
-			else if (args[2][1] == 'i')
-				flags.reset(U_I);	
+			}
+			else if (args[2][1] == 'i'){
+				flags.reset(U_I);
+			}
 			else if (args[2][1] == 'o'){
 				flags.reset(U_O);
 				user->_isIRCoperator = false;
 			}
-			else if (args[2][1] == 'w')
+			else if (args[2][1] == 'w'){
 				flags.reset(U_W);
+			}
 			else
 				reply = makeErrorMsg("MODE", 501);
+			if (!reply.size())
+				reply = makeMessageHeader(user, "MODE", user->getNick()) + "-" + args[2][1] + CR LF;
 		}
 	}
 
 
+	return "";
+}
+
+
+//#############################################//
+
+commWho::commWho(std::string text): command_base(text) {
+}
+
+
+std::string commWho::exec(users_map &users, channels_map &channels_map, void *parent){
+	Users *user = (Users*)parent;
+	if (!user)
+		return ("");
+	if (num_args > 3 || num_args < 2){
+		reply = makeErrorMsg("WHO", 461);
+		return "";
+	}
+	if (users.find(args[1]) != users.end() && !users[args[1]]->checkFlag(U_I)){
+		reply = makeReplyHeader(SERVER_NAME, user->getNick(), 352) \
+			+ users[args[1]]->getName() + " "+  users[args[1]]->getHostname() + " " + \
+			 + SERVER_NAME " " + users[args[1]]->getNick() + " H :0 " + users[args[1]]->getRealName() + CR LF;
+	}
+	reply += makeReplyHeader(SERVER_NAME, user->getNick(), 315) + user->getNick() + " :End of /WHO list" CR LF;
 	return "";
 }

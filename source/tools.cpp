@@ -32,19 +32,27 @@ std::string strtrim(std::string &str){
 void set_time(float seconds, struct timespec &tm){
 	tm.tv_sec = static_cast<int>(seconds);
 	tm.tv_nsec = (seconds - tm.tv_sec) * 1000000000;
+} 
+
+std::string	ft_itoa(int x)
+{
+	std::stringstream	buff;
+	std::string		tmp;
+	buff << x;
+	buff >> tmp;
+
+	return (tmp);
 }
 
 std::string getMOTD(std::string &target){
-	static std::string ret;
-	if (!ret.size()){
-		ret += ":" SERVER_NAME " 375 " + target + " :- " SERVER_NAME " Message of the day - \n";
-		ret += ":" SERVER_NAME " 372 " + target + " :- ############################################ \n";
-		ret += ":" SERVER_NAME " 372 " + target + " :- ############################################ \n";
-		ret += ":" SERVER_NAME " 372 " + target + " :- #### IT IS ANY TEXT THAT U CANT IMAGINE #### \n";
-		ret += ":" SERVER_NAME " 372 " + target + " :- ############################################ \n";
-		ret += ":" SERVER_NAME " 372 " + target + " :- ############################################ \n";
-		ret += ":" SERVER_NAME " 376 " + target + " :End of /MOTD command\n";
-	}
+	std::string ret;
+	ret += ":" SERVER_NAME " 375 " + target + " :- " SERVER_NAME " Message of the day - \n";
+	ret += ":" SERVER_NAME " 372 " + target + " :- ############################################ \n";
+	ret += ":" SERVER_NAME " 372 " + target + " :- ##                                        ## \n";
+	ret += ":" SERVER_NAME " 372 " + target + " :- ##   IT IS ANY TEXT THAT U CANT IMAGINE   ## \n";
+	ret += ":" SERVER_NAME " 372 " + target + " :- ##                                        ## \n";
+	ret += ":" SERVER_NAME " 372 " + target + " :- ############################################ \n";
+	ret += ":" SERVER_NAME " 376 " + target + " :End of /MOTD command\n";
 	return ret;
 }
 
@@ -64,6 +72,8 @@ command_base *genCommand(std::string text, bool auth){
 			return new commOper(text);
 		else if (command == "MODE")
 			return new commMode(text);
+		else if (command == "WHO")
+			return new commWho(text);
 	}
 	else{
 		if (command == "NICK")
@@ -106,7 +116,7 @@ std::string makeErrorMsg(std::string info, int error){
 		Errors.insert(std::pair<int, std::string> (481,  ":Permission Denied- You're not an IRC operator"        )  );
 		Errors.insert(std::pair<int, std::string> (482,  " :You're not channel operator"        )  );
 		Errors.insert(std::pair<int, std::string> (501,  " :Unknown MODE flag"        )  );
-		Errors.insert(std::pair<int, std::string> (502,  " :Cant change mode for other users"    "\n"     )  );
+		Errors.insert(std::pair<int, std::string> (502,  " :Cant change mode for other users"       )  );
 	}
 	std::map<int, std::string> :: iterator f = Errors.find(error);
 	if (f != Errors.end()){
@@ -116,3 +126,12 @@ std::string makeErrorMsg(std::string info, int error){
 	return Errors[0];
 }
 
+std::string makeMessageHeader(Users *sender, std::string messageType, std::string receiverNick){
+	if (!sender)
+		return (" " + messageType + " " + receiverNick + " :"  );
+	return (":" + sender->getNick() + "!" +  sender->getName()+ "@" +  sender->gethostIp() + " " + messageType + " " + receiverNick + " :");
+}
+
+std::string makeReplyHeader(std::string senderNick, std::string receiver, int code){
+	return (":" + senderNick + " " + ft_itoa(code) + " " + receiver + " ");
+}

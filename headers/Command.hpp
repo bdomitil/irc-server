@@ -110,6 +110,14 @@ class commMode : public command_base{
 		std::string exec(users_map &users_map, channels_map &channels_map, void *parent);
 };
 
+//#############################################//
 
+
+class commWho : public command_base{
+
+	public:
+		commWho(std::string text);
+		std::string exec(users_map &users_map, channels_map &channels_map, void *parent);
+};
 
 #endif

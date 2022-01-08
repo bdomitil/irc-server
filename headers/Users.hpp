@@ -42,8 +42,11 @@ public:
 	std::string	&getNick(void){return _nick;}
 	std::string &getPasswd(void){return _passwd;}
 	std::string &getName(void){return _name;}
+	std::string &getRealName(void){return _realname;}
+	std::string &getHostname(void){return _hostname;}
 	std::string &gethostIp(void){return _host_ip;}
 	std::bitset<4> &getflags(){return _flags;};
+	bool		checkFlag(int flag){ return _flags.test(flag);}
 	void		setNick(std::string nick){_nick = nick;}
 	void		setPass(std::string pass){_passwd = pass;}
 	void		setaPass(std::string pass){_apasswd = pass;}

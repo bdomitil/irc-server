@@ -10,6 +10,7 @@ protected:
 		std::vector<std::string>	args;
 		std::string					reply;
 		int							error;
+		std::string					request;
 
 public:
 		virtual std::string exec(users_map &users_map, channels_map &channels_map, void *parent) = 0;
@@ -129,4 +130,17 @@ class commJoin : public command_base{
 		commJoin(std::string text);
 		std::string exec(users_map &users_map, channels_map &channels_map, void *parent);
 };
+
+//#############################################//
+
+
+class commTopic : public command_base{
+
+	public:
+		commTopic(std::string text);
+		std::string exec(users_map &users_map, channels_map &channels_map, void *parent);
+};
+
+
+
 #endif

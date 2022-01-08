@@ -61,7 +61,8 @@ command_base *genCommand(std::string text, bool auth){
 	std::string command = text;
 	cutPrefix(command);
 	getArgs(command, tmpV);
-	command  = *tmpV.begin();
+	if (tmpV.size())
+		command  = *tmpV.begin();
 
 	if (auth){
 		if (command == "PING")
@@ -76,6 +77,8 @@ command_base *genCommand(std::string text, bool auth){
 			return new commWho(text);
 		else if (command == "JOIN")
 			return new commJoin(text);
+		else if (command == "TOPIC")
+			return new commTopic(text);
 	}
 	else{
 		if (command == "NICK")

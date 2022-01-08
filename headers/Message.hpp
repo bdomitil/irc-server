@@ -10,7 +10,7 @@ class Message{
 private:
 	bool						_isRead;
 	std::string					_message;
-	command_base				*_command;
+	std::vector<command_base *> _commands;
 
 public:
 	Buffer<MESSAGE_BUFFER_SIZE>	_buffer;
@@ -24,6 +24,8 @@ public:
 	bool						isRead(){return _isRead;}
 	bool						isSend(){return _isSend;}
 	void						exec(users_map &users_map, channels_map &channels_map, void *parent);
+	void						addCommand(command_base *command){_commands.push_back(command);}
+	int							queue(){return _commands.size();}
 	bool						_isSend;
 	Message();
 };

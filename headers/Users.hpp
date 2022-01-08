@@ -28,6 +28,7 @@ public:
 	Users		(int fd, t_event *event);
 	Users		(int fd);
 	void		getMessage(uint64_t readsize);
+	Message		&getMessage(){return message;}
 	bool		auth();
 	void		reset();
 	void		sendMessage(users_map &users_map, channels_map &channels_map, uint64_t writesize);

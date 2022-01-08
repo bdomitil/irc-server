@@ -4,16 +4,16 @@ Message::Message(){
 	_isRead = false;
 	_isSend = true;
 	_message.clear();
-	_command = nullptr;
+	_commands.clear();
 }
 
 void Message::reset(){
 	_isRead = false;
 	_isSend = true;
 	_message.clear();
-	if (_command)
-		delete _command;
-	_command = nullptr;
+	for (int i = 0;i < _commands.size(); i++)
+		delete _commands[i];
+	_commands.clear();
 }
 
 void Message::readM(int fd){
@@ -69,7 +69,13 @@ void Message::sendM(int fd, uint64_t writesize){
 			}
 		}
 	}
-	reset();
+	if (_commands.size() == 1 && !_buffer.getStore().size())
+		reset();
+	else{
+		_isRead = true;
+		if (_commands.size())
+			_commands.erase(_commands.begin());
+	}
 }
 
 void Message::sendM(int fd){
@@ -86,17 +92,20 @@ void Message::sendM(int fd){
 			}
 		}
 	}
-	reset();
+	if (_commands.size() == 1 && !_buffer.getStore().size())
+		reset();
+	else{
+		_isRead = true;
+		_commands.erase(_commands.begin());
+	}
 }
 
 
 void Message::exec(users_map &users_map, channels_map &channels_map, void *parent){
 	Users *user = (Users*)parent;
 	try{
-		if (!_command)
-			_command = genCommand(_buffer.getStore()[0], user->isAuth());
-		_command->exec(users_map, channels_map, parent);
-		_message += _command->getReply();
+		_commands[0]->exec(users_map, channels_map, parent);
+		_message += _commands[0]->getReply();
 	}
 	catch (command_base *e){
 		_message =  e->getReply();

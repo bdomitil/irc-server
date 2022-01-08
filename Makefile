@@ -1,7 +1,7 @@
 NAME =	irc-server
 
 SRCS =	source/Server.cpp source/tools.cpp source/Users.cpp source/Message.cpp \
-		source/event.cpp source/Command.cpp
+		source/event.cpp source/Command.cpp source/Channels.cpp
 
 MAIN =	main.cpp
 

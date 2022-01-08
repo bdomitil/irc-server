@@ -210,12 +210,18 @@ std::string commOper::exec(users_map &users, channels_map &channels_map, void *p
 	Users *user = (Users*)parent;
 	if (!user)
 		return ("");
-	if (num_args != 3)
+	if (num_args != 3){
 		reply = makeErrorMsg("OPER", 461);
+		error = 461;
+		throw this;
+	}
 	else if (g_opers->find(args[1]) != g_opers->end() && g_opers->find(args[1])->second == args[2])
 		user->makeIRCoperator();
-	else 
+	else{
 		reply = makeErrorMsg("", 464 );
+		error = 461;
+		throw this;
+	}
 
 	return "";
 }
@@ -230,8 +236,7 @@ std::string commMode::exec(users_map &users, channels_map &channels_map, void *p
 	Users *user = (Users*)parent;
 	if (!user)
 		return ("");
-	char type = args[1][0];
-	if (type == '#'){
+	if (args[1][0] == '#'){
 
 	}
 	else {
@@ -298,6 +303,7 @@ std::string commWho::exec(users_map &users, channels_map &channels_map, void *pa
 		return ("");
 	if (num_args > 3 || num_args < 2){
 		reply = makeErrorMsg("WHO", 461);
+		throw this;
 		return "";
 	}
 	if (users.find(args[1]) != users.end() && !users[args[1]]->checkFlag(U_I)){
@@ -306,5 +312,65 @@ std::string commWho::exec(users_map &users, channels_map &channels_map, void *pa
 			 + SERVER_NAME " " + users[args[1]]->getNick() + " H :0 " + users[args[1]]->getRealName() + CR LF;
 	}
 	reply += makeReplyHeader(SERVER_NAME, user->getNick(), 315) + user->getNick() + " :End of /WHO list" CR LF;
+	return "";
+}
+
+
+//#############################################//
+
+commJoin::commJoin(std::string text): command_base(text) {
+}
+
+
+std::string commJoin::exec(users_map &users, channels_map &channels_map, void *parent){
+	Users *user = (Users*)parent;
+	if (!user)
+		return ("");
+	if (num_args > 3 || num_args < 2){
+		reply = makeErrorMsg("JOIN", 461);
+		throw this;
+	}
+	if (channels_map.find(args[1]) == channels_map.end() && (args[1][0] != '#' && args[1][0] != '&')){
+		error = 403;
+		reply = makeErrorMsg(args[1], 403);
+	}
+	else if (channels_map.find(args[1]) == channels_map.end()) {
+		Channels *new_channel = new Channels(args[1], user);
+		channels_map[args[1]] = new_channel;
+		if (num_args == 3)
+			new_channel->setPassword(args[2]);
+		//call TOPIC
+		//call NAMES
+		reply = makeMessageHeader(user, "JOIN", "") + args[1] + CR LF;
+	}
+	else if (channels_map.find(args[1])->second->isPart(user)){
+		reply = prefix + " " + args[0] + " :" + args[1] + CR LF;
+		return "";
+	}
+	else{
+		Channels *channel  = channels_map[args[1]];
+		if (channel->getPassword().size() && num_args != 3){
+			error = 461;
+			reply = makeErrorMsg("JOIN", 461);
+		}else if (channel->getPassword().size() && channel->getPassword() != args[2]){
+			error = 475;
+			reply = makeErrorMsg(args[1], 475);
+		}
+		else if (channel->getMaxUsers() && channel->size() >= channel->getMaxUsers()){
+			error = 471;
+			reply = makeErrorMsg(args[1], 471);
+		}
+		else if (channel->getFlags().test(CH_INVITE_ONLY)){
+			error = 473;
+			reply = makeErrorMsg(args[1], 473);
+		}
+		else if (channel->isBaned(user->getNick())){
+			error = 474;
+			reply = makeErrorMsg(args[1], 474);
+		}
+		channel->addUser(user);
+		reply = makeMessageHeader(user, "JOIN", "") + args[1] + CR LF;
+	}
+	channels_map[args[1]]->writeToUsers(reply, user);
 	return "";
 }

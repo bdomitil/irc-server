@@ -72,6 +72,7 @@ void Users::sendMessage(users_map &users_map, channels_map &channels_map, uint64
 
 void Users::writeMessage(std::string text){
 	std::vector<std::string>&store = message._buffer.getStore();
+	if (text.find(CR LF) != std::string::npos)
 	store.insert(store.end(), text + CR LF);
 	_event->enableWriteEvent(_socket, this);
 }

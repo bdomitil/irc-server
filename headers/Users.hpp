@@ -34,7 +34,7 @@ public:
 	void		writeMessage(std::string text);
 
 public:
-	bool			_isIRCoperator;
+	bool		_isIRCoperator;
 	bool		isAuth(void){return _isAuth;}
 	bool		isIRCoperator(void){return _isIRCoperator;}
 	void		makeIRCoperator(void){_isIRCoperator = true;}

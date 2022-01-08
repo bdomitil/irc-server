@@ -6,9 +6,12 @@
 #define LF "\n"
 #define MESSAGE_BUFFER_SIZE 512
 #define MESSAGE_SEND_SIZE	2048
+#define SESSION_END_SEC		180
 #include "cpp-libs.hpp"
 
-
+//TODO WHO for channels
+//TODO MODE for channels
+//TODO PRIVMSG for channels
 class Users;
 class Channels;
 class Server;
@@ -24,8 +27,8 @@ int			getArgs(std::string &text, std::vector<std::string> &arg_store);
 #include "Command.hpp"
 #include "Buffer.hpp"
 #include "Message.hpp"
-#include "Channels.hpp"
 #include "Users.hpp"
+#include "Channels.hpp"
 #include "Server.hpp"
 
 class ErrorException : public std::exception {
@@ -57,4 +60,5 @@ std::string makeErrorMsg(std::string info, int error);
 std::string	ft_itoa(int x);
 std::string makeReplyHeader(std::string senderNick, std::string receiver, int code);
 std::string makeMessageHeader(Users *sender, std::string messageType, std::string receiverNick);
+std::time_t increase_session_time();
 #endif

@@ -52,27 +52,32 @@ void Users::getMessage(uint64_t readsize){
 void Users::sendMessage(users_map &users_map, channels_map &channels_map, uint64_t writesize){
 	std::vector<std::string>&store = message._buffer.getStore();
 	std::vector<std::string>::iterator i  = store.begin();
-	if (message.isSend()){
-		while (i != store.end() ){
-			message.exec(users_map, channels_map, this);
-			if (!_isAuth){
-				if (auth())
-					users_map.insert(std::pair<std::string, Users*>(_nick, this));
-			}
-			message.sendM(_socket, writesize);
-			store.erase(i);
-			std::vector<std::string>::iterator i  = store.begin();
+	while (i != store.end()){
+		message.addCommand(genCommand(*i, _isAuth));
+		i++;
+	}
+	store.clear();
+	if (message.isSend() && message.queue()){
+		message.exec(users_map, channels_map, this);
+		if (!_isAuth){
+			if (auth())
+				users_map.insert(std::pair<std::string, Users*>(_nick, this));
 		}
+		message.sendM(_socket, writesize);
 	}
 	else
 		message.sendM(_socket, writesize);
-	if (message.isSend())
+	if (message.isSend() && !message.queue())
 		_event->disableWriteEvent(_socket, this);
+	else
+		_event->enableWriteEvent(_socket, this);
 }
 
 void Users::writeMessage(std::string text){
 	std::vector<std::string>&store = message._buffer.getStore();
-	if (text.find(CR LF) != std::string::npos)
-	store.insert(store.end(), text + CR LF);
+	if (text.find(CR LF) == std::string::npos)
+		store.insert(store.end(), text + CR LF);
+	else
+		store.insert(store.end(), text);
 	_event->enableWriteEvent(_socket, this);
 }

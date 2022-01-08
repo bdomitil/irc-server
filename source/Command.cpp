@@ -40,6 +40,7 @@ int getArgs(std::string &text, std::vector<std::string> &arg_store){
 
 
 command_base::command_base(std::string text){
+	request = text;
 	prefix = cutPrefix(text);
 	num_args = getArgs(text, args);
 	error = false;
@@ -372,5 +373,40 @@ std::string commJoin::exec(users_map &users, channels_map &channels_map, void *p
 		reply = makeMessageHeader(user, "JOIN", "") + args[1] + CR LF;
 	}
 	channels_map[args[1]]->writeToUsers(reply, user);
+	user->getMessage().addCommand(new commTopic(request));
+	return "";
+}
+
+
+//#############################################//
+
+commTopic::commTopic(std::string text): command_base(text) {
+}
+
+
+std::string commTopic::exec(users_map &users, channels_map &channels_map, void *parent){
+	Users *user = (Users*)parent;
+	if (!user)
+		return ("");
+	if (num_args > 3 || num_args < 2){
+		error = 461;
+		reply = makeErrorMsg("TOPIC", 461);
+	}else if (channels_map.find(args[1]) == channels_map.end() ||
+				!channels_map[args[1]]->isPart(user)){
+		error = 442;
+		reply = makeErrorMsg(args[1], 442);
+	}else if(channels_map[args[1]]->getFlags().test(CH_TOPIC) && !channels_map[args[1]]->isOper(user)){
+		error = 482;
+		reply = makeErrorMsg(args[1], 482);
+	}else if (num_args == 3){
+		channels_map[args[1]]->setTopic(args[2]);
+		reply = makeReplyHeader(SERVER_NAME, user->getNick(), 332) + args[1] + " :" + channels_map[args[1]]->getTopic() + CR LF;
+	} 
+	else if (!channels_map[args[1]]->getTopic().size()){
+		reply = makeReplyHeader(SERVER_NAME, user->getNick(), 331) + args[1] + " :No topic is set" CR LF;
+	}
+	else 
+		reply = makeReplyHeader(SERVER_NAME, user->getNick(), 332) + args[1] + " :" + channels_map[args[1]]->getTopic() + CR LF;
+		
 	return "";
 }

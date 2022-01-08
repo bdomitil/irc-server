@@ -24,7 +24,11 @@ void Users::reset(){
 	_host_ip.clear();
 	_flags.reset();
 	_nick.clear();
-	_apasswd.clear(); 
+	_apasswd.clear();
+	_hostname.clear();
+	_name.clear();
+	_servername.clear();
+	_realname.clear();
 }
 
 bool Users::auth(){

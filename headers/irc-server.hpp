@@ -54,4 +54,7 @@ std::string getMOTD(std::string &target);
 void set_time(float seconds, struct timespec &tm);
 command_base *genCommand(std::string text, bool auth);
 std::string makeErrorMsg(std::string info, int error);
+std::string	ft_itoa(int x);
+std::string makeReplyHeader(std::string senderNick, std::string receiver, int code);
+std::string makeMessageHeader(Users *sender, std::string messageType, std::string receiverNick);
 #endif

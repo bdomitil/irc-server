@@ -36,7 +36,9 @@ public:
 	std::string 	&getName(){return _name;}
 	std::string 	&getTopic(){return _topic;}
 	std::string 	&getPassword(){return _password;}
+	void			dropPassword(){_password.clear();}
 	uint64_t		&getMaxUsers(){return _max_users;}
+	void			dropMaxUsers(){_max_users = 0;}
 	std::bitset<6>	&getFlags(){return _flags;}
 	void			setTopic(std::string topic){_topic = topic;}
 	void			setPassword(std::string password){_password = password;}
@@ -50,6 +52,8 @@ public:
 	bool			isPart(std::string nick);
 	bool			canVote(Users *user);
 	bool			canVote(std::string nick);
+	void			addVote(Users *user);
+	void			dropVote(Users *user);
 	void			dropUser(Users *user);
 	void			dropUser(std::string nick);
 	void			addUser(Users *user);
@@ -57,9 +61,10 @@ public:
 	void			dropOper(Users *user);
 	void			changeOwner();
 	void			addBan(std::string nick);
-	void			dropBan(std::string nick);
 	bool			isBaned(std::string nick);
 	bool			isBaned(Users *user);
+	void			setBan(std::string ban);
+	void			dropBan(std::string ban);
 	std::string		whoUsers(bool flag_O, bool flag_I, Users *user);
 	std::string		userNames(Users *user);
 	void			writeToUsers(std::string text, Users *user);

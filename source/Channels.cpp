@@ -35,8 +35,12 @@ void Channels::dropOper(Users * user){
 
 
 void Channels::changeOwner(){
-	if (_users.size())
+	if (_users.size()){
 		_owner = _users.begin()->first;
+		this->makeOper(_users.begin()->first);
+		_users.begin()->first->getMessage().addCommand(new commMode("MODE " + _name + " +o "  + _users.begin()->first->getNick()));
+	}
+
 }
 
 void Channels::dropUser(Users *user){

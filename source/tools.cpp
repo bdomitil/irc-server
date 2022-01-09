@@ -83,6 +83,8 @@ command_base *genCommand(std::string text, bool auth){
 			return new commTopic(text);
 		else if (command == "NAMES")
 			return new commNames(text);
+		else if (command == "QUIT")
+			return new commQuit(text);
 	}
 	else{
 		if (command == "NICK")

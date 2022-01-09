@@ -10,8 +10,8 @@
 #define CH_NO_OTHERS	4
 #define CH_MODERATED	5
 //USER FLAGS
-#define CH_OPERATOR		1
-#define CH_VOTE			2
+#define CH_OPERATOR		0
+#define CH_VOTE			1
 
 
 

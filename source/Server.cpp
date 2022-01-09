@@ -119,6 +119,8 @@ void Server::startLoop(void){
 			}
 			else if (event_list[res - 1].flags & EV_EOF){
 				user = static_cast < Users*>(event_list[res - 1].udata);
+				commQuit quit("QUIT :I am tired");
+				quit.exec(users, channels,user);
 				close(user->getSocket());
 				users.erase(user->getNick());
 			}

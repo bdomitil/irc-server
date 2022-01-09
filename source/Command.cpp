@@ -195,15 +195,14 @@ std::string commPrivMsg::exec(users_map &users, channels_map &channels_map, void
 		reply = makeErrorMsg("PRIVMSG", 461);
 	else if (num_args == 3 && !args[2].size())
 		reply = makeErrorMsg("PRIVMSG", 412);
+	else if (prefix.size())
+		reply = request;
 	else if(args[1][0] != '#') {
 		users_map :: iterator f = users.find(args[1]);
 		if (f == users.end())
 			reply = makeErrorMsg("PRIVMSG", 444);
 		else if ( f->second != user)
 			users[args[1]]->writeMessage(makeMessageHeader(user, "PRIVMSG", args[1]) + args[2]);
-		else if ( f->second == user)
-			// reply = prefix + " " + args[0] + " " + args[1] + " :" + args[2] + CR LF;
-			reply = request;
 	}
 	else{
 		channels_map::iterator f = channels_map.begin();
@@ -211,10 +210,8 @@ std::string commPrivMsg::exec(users_map &users, channels_map &channels_map, void
 			reply = makeErrorMsg("PRIVMSG", 401);
 		else if (f->second->getFlags().test(CH_NO_OTHERS) && !f->second->isPart(user))
 			reply = makeErrorMsg("PRIVMSG", 442);
-		else if (f->second->getFlags().test(CH_MODERATED) && !f->second->canVote(user))
+		else if (f->second->getFlags().test(CH_MODERATED) && (!f->second->canVote(user) && !f->second->isOper(user)))
 			reply = makeErrorMsg(f->second->getName(), 404);
-		else if (prefix.size())
-			reply = request;
 		else{
 			f->second->writeToUsers(makeMessageHeader(user, "PRIVMSG", args[1]) + args[2] + CR LF, user);
 		}
@@ -261,6 +258,10 @@ commMode::commMode(std::string text): command_base(text) {
 
 std::string commMode::exec(users_map &users, channels_map &channels_map, void *parent){
 	Users *user = (Users*)parent;
+	if (prefix.size()){
+		reply = request;
+		return "";
+	}
 	if (!user)
 		return ("");
 	if (num_args < 2){
@@ -344,9 +345,9 @@ std::string commMode::exec(users_map &users, channels_map &channels_map, void *p
 						return "";
 					}
 					else if (args[2][0] == '+')
-						channels_map[args[1]]->addVote(user);
+						channels_map[args[1]]->addVote(users[args[3]]);
 					else
-						channels_map[args[1]]->dropVote(user);
+						channels_map[args[1]]->dropVote(users[args[3]]);
 				}else if (*i == 'k'){
 
 					if (num_args != 4){
@@ -361,6 +362,18 @@ std::string commMode::exec(users_map &users, channels_map &channels_map, void *p
 						channels_map[args[1]]->dropPassword();
 				}
 				i++;
+			}
+			if (!reply.size() && (args[2][0] == '+' || args[2][0] == '-') && num_args == 4){
+				reply = makeMessageHeader(user, "MODE", args[1]);
+				reply.pop_back();
+				reply += args[2] + " "+ args[3] + CR LF;
+				channels_map[args[1]]->writeToUsers(reply, user);
+			}
+			else if (!reply.size() && (args[2][0] == '+' || args[2][0] == '-')){
+				reply = makeMessageHeader(user, "MODE", args[1]);
+				reply.pop_back();
+				reply += args[2] + CR LF;
+				channels_map[args[1]]->writeToUsers(reply, user);
 			}
 		}
 	}
@@ -579,5 +592,40 @@ std::string commNames::exec(users_map &users, channels_map &channels_map, void *
 			reply = channels_map[args[1]]->userNames(user);
 	}
 	reply += makeReplyHeader(SERVER_NAME, user->getNick(), 366) + channels_map[args[1]]->getName() +  " :End of /NAMES list" CR LF;
+	return "";
+}
+
+
+//#############################################//
+
+commQuit::commQuit(std::string text): command_base(text) {
+
+
+}
+
+
+std::string commQuit::exec(users_map &users, channels_map &channels_map, void *parent){
+	Users *user = (Users*)parent;
+	if (!user)
+		return ("");
+	if (num_args < 2){
+		reply = makeErrorMsg("QUIT", 461);
+		error = 461;
+		throw this;
+	}
+	if (prefix.size())
+		reply = request;
+	else{
+		channels_map::iterator i = channels_map.begin();
+		for (; i != channels_map.end(); i++){
+			if (i->second->isPart(user)){
+				reply = makeMessageHeader(user, "QUIT", "") + args[1];
+				i->second->writeToUsers(reply, user);
+				i->second->dropUser(user);
+				if (i->second->isDead())
+					channels_map.erase(i), i = channels_map.begin();
+			}
+		}
+	}
 	return "";
 }

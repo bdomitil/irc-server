@@ -79,6 +79,8 @@ command_base *genCommand(std::string text, bool auth){
 			return new commJoin(text);
 		else if (command == "TOPIC")
 			return new commTopic(text);
+		else if (command == "NAMES")
+			return new commNames(text);
 	}
 	else{
 		if (command == "NICK")
@@ -134,6 +136,9 @@ std::string makeErrorMsg(std::string info, int error){
 std::string makeMessageHeader(Users *sender, std::string messageType, std::string receiverNick){
 	if (!sender)
 		return (" " + messageType + " " + receiverNick + " :"  );
+	else if (!receiverNick.size())
+		return (":" + sender->getNick() + "!" +  sender->getName()+ "@" +  sender->gethostIp() + " " + messageType + " :");
+
 	return (":" + sender->getNick() + "!" +  sender->getName()+ "@" +  sender->gethostIp() + " " + messageType + " " + receiverNick + " :");
 }
 
@@ -149,4 +154,13 @@ std::time_t increase_session_time(){
 	tmp->tm_hour += 1;
 	curr = std::mktime(tmp);
 	return (curr);
+}
+
+std::string prefix_to_sender(std::string &prefix){
+	int pos ;
+	pos = prefix.find('!');
+	if (pos != std::string::npos){
+		return  prefix.substr(1, pos -1);
+	}
+	return prefix;
 }

@@ -61,4 +61,5 @@ std::string	ft_itoa(int x);
 std::string makeReplyHeader(std::string senderNick, std::string receiver, int code);
 std::string makeMessageHeader(Users *sender, std::string messageType, std::string receiverNick);
 std::time_t increase_session_time();
+std::string prefix_to_sender(std::string &prefix);
 #endif

@@ -186,15 +186,34 @@ std::string commPrivMsg::exec(users_map &users, channels_map &channels_map, void
 	Users *user = (Users*)parent;
 	if (!user)
 		return ("");
-	users_map :: iterator f = users.find(args[1]);
-	if (num_args != 3)
+	else if (num_args != 3)
 		reply = makeErrorMsg("PRIVMSG", 461);
-	else if (f == users.end())
-		reply = makeErrorMsg("PRIVMSG", 444);
-	else if ( f->second != user)
-		users[args[1]]->writeMessage(makeMessageHeader(user, "PRIVMSG", args[1]) + args[2]);
-	else if ( f->second == user)
-		reply = prefix + " " + args[0] + " " + args[1] + " :" + args[2] + CR LF;
+	else if (num_args == 3 && !args[2].size())
+		reply = makeErrorMsg("PRIVMSG", 412);
+	else if(args[1][0] != '#') {
+		users_map :: iterator f = users.find(args[1]);
+		if (f == users.end())
+			reply = makeErrorMsg("PRIVMSG", 444);
+		else if ( f->second != user)
+			users[args[1]]->writeMessage(makeMessageHeader(user, "PRIVMSG", args[1]) + args[2]);
+		else if ( f->second == user)
+			// reply = prefix + " " + args[0] + " " + args[1] + " :" + args[2] + CR LF;
+			reply = request;
+	}
+	else{
+		channels_map::iterator f = channels_map.begin();
+		if (f == channels_map.end())
+			reply = makeErrorMsg("PRIVMSG", 401);
+		else if (f->second->getFlags().test(CH_NO_OTHERS) && !f->second->isPart(user))
+			reply = makeErrorMsg("PRIVMSG", 442);
+		else if (f->second->getFlags().test(CH_MODERATED) && !f->second->canVote(user))
+			reply = makeErrorMsg(f->second->getName(), 404);
+		else if (prefix.size())
+			reply = request;
+		else{
+			f->second->writeToUsers(makeMessageHeader(user, "PRIVMSG", args[1]) + args[2] + CR LF, user);
+		}
+	}
 
 	return "";
 }
@@ -226,6 +245,8 @@ std::string commOper::exec(users_map &users, channels_map &channels_map, void *p
 
 	return "";
 }
+
+//#############################################//
 
 commMode::commMode(std::string text): command_base(text) {
 
@@ -397,7 +418,8 @@ std::string commJoin::exec(users_map &users, channels_map &channels_map, void *p
 		reply = makeMessageHeader(user, "JOIN", "") + args[1] + CR LF;
 	}
 	channels_map[args[1]]->writeToUsers(reply, user);
-	user->getMessage().addCommand(new commTopic(request));
+	user->getMessage().addCommand(new commTopic( "WHO " + channels_map[args[1]]->getName()));
+	user->getMessage().addCommand(new commNames("NAMES " + channels_map[args[1]]->getName()));
 	return "";
 }
 
@@ -432,5 +454,31 @@ std::string commTopic::exec(users_map &users, channels_map &channels_map, void *
 	else 
 		reply = makeReplyHeader(SERVER_NAME, user->getNick(), 332) + args[1] + " :" + channels_map[args[1]]->getTopic() + CR LF;
 		
+	return "";
+}
+
+
+//#############################################//
+
+commNames::commNames(std::string text): command_base(text) {
+
+
+}
+
+
+std::string commNames::exec(users_map &users, channels_map &channels_map, void *parent){
+	Users *user = (Users*)parent;
+	if (!user)
+		return ("");
+	if (num_args < 2){
+		reply = makeErrorMsg("NAME", 461);
+		error = 461;
+		throw this;
+	}else if(channels_map.find(args[1]) != channels_map.end() &&
+	! channels_map[args[1]]->getFlags().test(CH_SECRET)	 && 
+	! channels_map[args[1]]->getFlags().test(CH_PRIVATE) ){
+			reply = channels_map[args[1]]->userNames(user);
+	}
+	reply += makeReplyHeader(SERVER_NAME, user->getNick(), 366) + channels_map[args[1]]->getName() +  " :End of /NAMES list" CR LF;
 	return "";
 }

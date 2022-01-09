@@ -142,5 +142,15 @@ class commTopic : public command_base{
 };
 
 
+//#############################################//
+
+
+class commNames : public command_base{
+
+	public:
+		commNames(std::string text);
+		std::string exec(users_map &users_map, channels_map &channels_map, void *parent);
+};
+
 
 #endif

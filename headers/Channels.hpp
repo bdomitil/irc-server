@@ -2,12 +2,14 @@
 #define IRC_CHANNELS_HPP
 
 #include "irc-server.hpp"
-#define CH_PRIVATE 		1
-#define CH_SECRET 		2
-#define CH_INVITE_ONLY	3
-#define CH_TOPIC		4
-#define CH_NO_OTHERS	5
-#define CH_MODERATED	6
+//CHANNEL FLAGS
+#define CH_PRIVATE 		0
+#define CH_SECRET 		1
+#define CH_INVITE_ONLY	2
+#define CH_TOPIC		3
+#define CH_NO_OTHERS	4
+#define CH_MODERATED	5
+//USER FLAGS
 #define CH_OPERATOR		1
 #define CH_VOTE			2
 
@@ -46,6 +48,8 @@ public:
 	bool			isOper(std::string nick);
 	bool			isPart(Users *user);
 	bool			isPart(std::string nick);
+	bool			canVote(Users *user);
+	bool			canVote(std::string nick);
 	void			dropUser(Users *user);
 	void			dropUser(std::string nick);
 	void			addUser(Users *user);
@@ -57,6 +61,7 @@ public:
 	bool			isBaned(std::string nick);
 	bool			isBaned(Users *user);
 	std::string		whoUsers(bool flag_O, bool flag_I, Users *user);
+	std::string		userNames(Users *user);
 	void			writeToUsers(std::string text, Users *user);
 	std::vector< std::pair<Users*, std::bitset<2> > > :: iterator find_user(Users *user);
 	std::vector< std::pair<Users*, std::bitset<2> > > :: iterator find_user(std::string nick);

@@ -133,6 +133,20 @@ bool Channels::isBaned(std::string nick){
 	return (false);
 }
 
+bool Channels::canVote(std::string nick){
+	std::vector< std::pair<Users*, std::bitset<2> > > :: iterator f = find_user(nick);
+	if (f == _users.end())
+		return false;
+	return f->second.test(CH_VOTE);
+}
+
+bool Channels::canVote(Users *user){
+	std::vector< std::pair<Users*, std::bitset<2> > > :: iterator f = find_user(user);
+	if (f == _users.end())
+		return false;
+	return f->second.test(CH_VOTE);
+}
+
 void Channels::writeToUsers(std::string text, Users *sender){
 	std::vector< std::pair<Users*, std::bitset<2> > > :: iterator i = _users.begin();
 	while (i != _users.end()){
@@ -145,7 +159,7 @@ void Channels::writeToUsers(std::string text, Users *sender){
 std::string Channels::whoUsers(bool flag_O, bool flag_I, Users *user){
 	std::vector< std::pair<Users*, std::bitset<2> > > :: iterator i = _users.begin();
 	std::string result;
-	while (i < _users.end()){
+	while (i != _users.end()){
 		char q;
 		if (i->first->isIRCoperator())
 			q = '*';
@@ -183,6 +197,23 @@ std::string Channels::whoUsers(bool flag_O, bool flag_I, Users *user){
 	return result;
 }
 
+
+std::string Channels::userNames(Users *user){
+	std::vector< std::pair<Users*, std::bitset<2> > > :: iterator i = _users.begin();
+	std::string result;
+	if (i != _users.end())
+		result = makeReplyHeader(SERVER_NAME, user->getNick(), 353) + "= " + getName() + " :";
+	while (i != _users.end()){
+		if (isOper(i->first))
+			result += "@" + i->first->getNick() + " ";
+		else 
+			result += i->first->getNick() + " ";
+		i++;
+	}
+	if (result.size())
+		result += CR LF;
+	return result;
+}
 
 std::vector< std::pair<Users*, std::bitset<2> > > :: iterator Channels::find_user(Users *user ){
 	std::vector< std::pair<Users*, std::bitset<2> > > :: iterator i = _users.begin();

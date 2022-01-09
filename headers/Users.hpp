@@ -23,22 +23,25 @@ private:
 	t_event			*_event;
 	Message			message;
 	bool			_isAuth;
+	bool			_isDead;
 	
 public:
 	Users		(int fd, t_event *event);
 	Users		(int fd);
+	~Users		();
 	void		getMessage(uint64_t readsize);
 	Message		&getMessage(){return message;}
-	bool		auth();
+	bool		auth(users_map &users);
 	void		reset();
 	void		sendMessage(users_map &users_map, channels_map &channels_map, uint64_t writesize);
 	void		writeMessage(std::string text);
 
 public:
 	bool		_isIRCoperator;
-	bool		isAuth(void){return _isAuth;}
-	bool		isIRCoperator(void){return _isIRCoperator;}
 	void		makeIRCoperator(void){_isIRCoperator = true;}
+	bool		&isAuth(void){return _isAuth;}
+	bool		&isIRCoperator(void){return _isIRCoperator;}
+	bool		&isDead(){return _isDead;}
 	int			&getSocket(void){return _socket;}
 	std::string	&getNick(void){return _nick;}
 	std::string &getPasswd(void){return _passwd;}

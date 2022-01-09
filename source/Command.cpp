@@ -488,7 +488,7 @@ std::string commJoin::exec(users_map &users, channels_map &channels_map, void *p
 		reply = makeErrorMsg("JOIN", 461);
 		throw this;
 	}
-	if (channels_map.find(args[1]) == channels_map.end() && (args[1][0] != '#' && args[1][0] != '&')){
+	if (channels_map.find(args[1]) == channels_map.end() && args[1][0] != '#'){
 		error = 403;
 		reply = makeErrorMsg(args[1], 403);
 	}
@@ -510,21 +510,26 @@ std::string commJoin::exec(users_map &users, channels_map &channels_map, void *p
 		if (channel->getPassword().size() && num_args != 3){
 			error = 461;
 			reply = makeErrorMsg("JOIN", 461);
+			throw this;
 		}else if (channel->getPassword().size() && channel->getPassword() != args[2]){
 			error = 475;
 			reply = makeErrorMsg(args[1], 475);
+			throw this;
 		}
 		else if (channel->getMaxUsers() && channel->size() >= channel->getMaxUsers()){
 			error = 471;
 			reply = makeErrorMsg(args[1], 471);
+			throw this;
 		}
 		else if (channel->getFlags().test(CH_INVITE_ONLY)){
 			error = 473;
 			reply = makeErrorMsg(args[1], 473);
+			throw this;
 		}
 		else if (channel->isBaned(user->getNick())){
 			error = 474;
 			reply = makeErrorMsg(args[1], 474);
+			throw this;
 		}
 		channel->addUser(user);
 		reply = makeMessageHeader(user, "JOIN", "") + args[1] + CR LF;
@@ -617,15 +622,37 @@ std::string commQuit::exec(users_map &users, channels_map &channels_map, void *p
 		reply = request;
 	else{
 		channels_map::iterator i = channels_map.begin();
+		close(user->getSocket());
+		users.erase(user->getNick());
 		for (; i != channels_map.end(); i++){
 			if (i->second->isPart(user)){
 				reply = makeMessageHeader(user, "QUIT", "") + args[1];
 				i->second->writeToUsers(reply, user);
 				i->second->dropUser(user);
-				if (i->second->isDead())
-					channels_map.erase(i), i = channels_map.begin();
+				if (i->second->isDead()){
+					delete i->second;
+					channels_map.erase(i);
+					i = channels_map.begin();
+				}
 			}
 		}
 	}
+	return "";
+}
+
+
+//#############################################//
+
+commMODT::commMODT(std::string text): command_base(text) {
+
+
+}
+
+
+std::string commMODT::exec(users_map &users, channels_map &channels_map, void *parent){
+	Users *user = (Users*)parent;
+	if (!user)
+		return ("");
+	reply = getMOTD(user->getNick());
 	return "";
 }

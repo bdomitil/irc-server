@@ -8,10 +8,9 @@
 #define MESSAGE_SEND_SIZE	2048
 #define SESSION_END_SEC		180
 #include "cpp-libs.hpp"
+//TODO INVITE 
+//TODO KICK
 
-//TODO WHO for channels
-//TODO MODE for channels
-//TODO PRIVMSG for channels
 class Users;
 class Channels;
 class Server;

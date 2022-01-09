@@ -6,6 +6,7 @@ Users::Users(int fd){
 	_socket = fd;
 	_isAuth = false;
 	_isIRCoperator = false;
+	_isDead = false;
 }
 
 Users::Users(int fd, t_event *event){
@@ -17,6 +18,11 @@ Users::Users(int fd, t_event *event){
 	event->addReadEvent(_socket, this);
 	event->addWriteEvent(_socket, this);
 	event->disableWriteEvent(_socket, this);
+}
+
+Users::~Users(){
+	uint32_t &ev_size = _event->size();
+	ev_size -= 2;
 }
 
 void Users::reset(){
@@ -31,11 +37,14 @@ void Users::reset(){
 	_realname.clear();
 }
 
-bool Users::auth(){
+bool Users::auth(users_map &users){
+	if (_isAuth)
+		return true;
 	if (_apasswd.size() && _realname.size() && _nick.size())
 	{
 		_isAuth = true;
-		message.setMessage(getMOTD(_nick));
+		message.addCommand(new commMODT(" "));
+		users[_nick] = this;
 		return true;
 	}
 	return false;
@@ -59,10 +68,11 @@ void Users::sendMessage(users_map &users_map, channels_map &channels_map, uint64
 	store.clear();
 	if (message.isSend() && message.queue()){
 		message.exec(users_map, channels_map, this);
-		if (!_isAuth){
-			if (auth())
-				users_map.insert(std::pair<std::string, Users*>(_nick, this));
+		if (_isDead){
+			delete this;
+			return ;
 		}
+		auth(users_map);
 		message.sendM(_socket, writesize);
 	}
 	else

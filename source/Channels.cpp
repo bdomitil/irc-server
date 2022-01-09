@@ -45,7 +45,7 @@ void Channels::changeOwner(){
 
 void Channels::dropUser(Users *user){
 	std::vector< std::pair<Users*, std::bitset<2> > > :: iterator f = find_user(user);
-	if (f != _users.end()){
+	if (f != _users.end() && _owner == user){
 		_users.erase(f);
 		changeOwner();
 	}
@@ -232,7 +232,7 @@ std::string Channels::userNames(Users *user){
 
 std::vector< std::pair<Users*, std::bitset<2> > > :: iterator Channels::find_user(Users *user ){
 	std::vector< std::pair<Users*, std::bitset<2> > > :: iterator i = _users.begin();
-	while (i != _users.end()){
+	while (i != _users.end() && _users.size()){
 		 if (user == i->first)
 		 	return i;
 		i++;

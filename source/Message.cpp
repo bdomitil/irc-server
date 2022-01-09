@@ -73,8 +73,10 @@ void Message::sendM(int fd, uint64_t writesize){
 		reset();
 	else{
 		_isRead = true;
-		if (_commands.size())
+		if (_commands.size()){
+			delete _commands[0];
 			_commands.erase(_commands.begin());
+		}
 	}
 }
 
@@ -96,6 +98,7 @@ void Message::sendM(int fd){
 		reset();
 	else{
 		_isRead = true;
+		delete _commands[0];
 		_commands.erase(_commands.begin());
 	}
 }

@@ -117,12 +117,10 @@ void Server::startLoop(void){
 				if (!(user = accept_new_user(event)))
 					std::cerr << "ERROR ACCEPTING NEW CONNECTION; PROBLEM :" << strerror(errno) << std::endl;
 			}
-			else if (event_list[res - 1].flags & EV_EOF){
+			else if (event_list[res - 1].flags & EV_EOF ){
 				user = static_cast < Users*>(event_list[res - 1].udata);
 				commQuit quit("QUIT :I am tired");
 				quit.exec(users, channels,user);
-				close(user->getSocket());
-				users.erase(user->getNick());
 			}
 			else if (event_list[res - 1].filter == EVFILT_READ){
 				user = static_cast < Users*>(event_list[res - 1].udata);

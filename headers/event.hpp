@@ -16,8 +16,8 @@ public:
 	void disableWriteEvent(int fd, void *udata);
 	void enableWriteEvent(int fd, void *udata);
 	void enableReadEvent(int fd, void *udata);
-
 	int	 proc(struct kevent **list);
+	uint32_t &size(){return update_len;}
 	t_event();
 };
 

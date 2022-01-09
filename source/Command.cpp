@@ -71,8 +71,13 @@ std::string commNick::exec(users_map &users, channels_map &channels_map, void *p
 		error = 433;
 		throw this;
 	}
-	else
+	else{
+		if (users.find(user->getNick()) != users.end()){
+			users.erase(user->getNick());
+			users[args[1]] = user;
+		}
 		user->setNick(args[1]);
+	}
 	return ("");
 }
 
@@ -258,13 +263,109 @@ std::string commMode::exec(users_map &users, channels_map &channels_map, void *p
 	Users *user = (Users*)parent;
 	if (!user)
 		return ("");
+	if (num_args < 2){
+		reply = makeErrorMsg("MODE", 461);
+		error = 461;
+		return "";
+	}
 	if (args[1][0] == '#'){
+		if (channels_map.find(args[1]) == channels_map.end())
+			reply = makeErrorMsg(args[1], 403);
+		else if (!channels_map[args[1]]->isPart(user))
+			reply = makeErrorMsg(args[1], 442);
+		else if (!channels_map[args[1]]->isOper(user))
+			reply = makeErrorMsg(args[1], 482);
+		else if (args[2][0] == '+' || args[2][0] == '-'){
+			std::string ::iterator i = args[2].begin();
+			i++;
+			while (i != args[2].end()){
 
+				if (*i == 'o'){
+					if (args[2][0] == '+')
+						channels_map[args[1]]->makeOper(users[args[3]]);
+					else
+						channels_map[args[1]]->dropOper(users[args[3]]);
+				}else if (*i == 'p'){
+					if (args[2][0] == '+')
+						channels_map[args[1]]->getFlags().set(CH_PRIVATE);
+					else
+						channels_map[args[1]]->getFlags().reset(CH_PRIVATE);
+				}else if (*i == 's'){
+					if (args[2][0] == '+')
+						channels_map[args[1]]->getFlags().set(CH_SECRET);
+					else
+						channels_map[args[1]]->getFlags().reset(CH_SECRET);
+				}else if (*i == 'i'){
+					if (args[2][0] == '+')
+						channels_map[args[1]]->getFlags().set(CH_INVITE_ONLY);
+					else
+						channels_map[args[1]]->getFlags().reset(CH_INVITE_ONLY);
+				}else if (*i == 't'){
+					if (args[2][0] == '+')
+						channels_map[args[1]]->getFlags().set(CH_TOPIC);
+					else
+						channels_map[args[1]]->getFlags().reset(CH_TOPIC);
+				}else if (*i == 'n'){
+					if (args[2][0] == '+')
+						channels_map[args[1]]->getFlags().set(CH_NO_OTHERS);
+					else
+						channels_map[args[1]]->getFlags().reset(CH_NO_OTHERS);
+				}else if (*i == 'm'){
+					if (args[2][0] == '+')
+						channels_map[args[1]]->getFlags().set(CH_MODERATED);
+					else
+						channels_map[args[1]]->getFlags().reset(CH_MODERATED);
+				}else if (*i == 'l'){
+
+					if (num_args != 4){
+						reply = makeErrorMsg(args[1], 461);
+						return "";
+					}
+					if (args[2][0] == '+')
+						channels_map[args[1]]->setMax(atoi(args[3].c_str()));
+					else
+						channels_map[args[1]]->dropMaxUsers();
+				}else if (*i == 'b'){
+					if (num_args != 4){
+						reply = makeErrorMsg(args[1], 461);
+						return "";
+				}
+					if (args[2][0] == '+')
+						channels_map[args[1]]->addBan(args[3]);
+					else
+						channels_map[args[1]]->dropBan(args[3]);
+				}else if (*i == 'v'){
+
+					if (num_args != 4){
+						reply = makeErrorMsg(args[1], 461);
+						return "";
+					}else if (users.find(args[3]) == users.end()){
+						reply = makeErrorMsg(args[1], 401);
+						return "";
+					}
+					else if (args[2][0] == '+')
+						channels_map[args[1]]->addVote(user);
+					else
+						channels_map[args[1]]->dropVote(user);
+				}else if (*i == 'k'){
+
+					if (num_args != 4){
+						reply = makeErrorMsg(args[1], 461);
+						return "";
+					}else if (channels_map[args[1]]->getPassword().size()){
+						reply = makeErrorMsg(args[1], 467);
+						return "";
+					}else if (args[2][0] == '+')
+						channels_map[args[1]]->setPassword(args[3]);
+					else
+						channels_map[args[1]]->dropPassword();
+				}
+				i++;
+			}
+		}
 	}
 	else {
-		if (num_args != 3)
-			reply = makeErrorMsg("MODE", 461);
-		else if ((args[2][0] != '+' && args[2][0] != '-')  || args[2].size() != 2)
+		if ((args[2][0] != '+' && args[2][0] != '-')  || args[2].size() != 2)
 			reply = makeErrorMsg("MODE", 501);
 		else if (args[1] != user->getNick())
 			reply = makeErrorMsg("MODE", 502);
@@ -307,8 +408,6 @@ std::string commMode::exec(users_map &users, channels_map &channels_map, void *p
 				reply = makeMessageHeader(user, "MODE", user->getNick()) + "-" + args[2][1] + CR LF;
 		}
 	}
-
-
 	return "";
 }
 

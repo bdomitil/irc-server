@@ -101,18 +101,6 @@ void Channels::addBan(std::string nick){
 		_bans.push_back(nick);
 }
 
-
-void Channels::dropBan(std::string nick){
-	std::vector<std::string> :: iterator i = _bans.begin();
-	while (i != _bans.end()){
-		if (*i == nick)
-			break;
-		i++;
-	}
-	if (i != _bans.end())
-		_bans.erase(i);
-}
-
 bool Channels::isBaned(Users *user){
 	std::vector<std::string> :: iterator i = _bans.begin();
 	while (i != _bans.end()){
@@ -133,6 +121,17 @@ bool Channels::isBaned(std::string nick){
 	return (false);
 }
 
+void Channels::setBan(std::string ban){
+	if ( std::find(_bans.begin(), _bans.end(), ban)  != _bans.end())
+		_bans.push_back(ban);
+}
+
+void Channels::dropBan(std::string ban){
+	std::vector<std::string> :: iterator f = std::find(_bans.begin(), _bans.end(), ban);
+	if (f != _bans.end())
+		_bans.erase(f);
+}
+
 bool Channels::canVote(std::string nick){
 	std::vector< std::pair<Users*, std::bitset<2> > > :: iterator f = find_user(nick);
 	if (f == _users.end())
@@ -145,6 +144,18 @@ bool Channels::canVote(Users *user){
 	if (f == _users.end())
 		return false;
 	return f->second.test(CH_VOTE);
+}
+
+void Channels::addVote(Users *user){
+	std::vector< std::pair<Users*, std::bitset<2> > > :: iterator f = find_user(user);
+	if ( f != _users.end())
+		f->second.set(CH_VOTE);
+}
+
+void Channels::dropVote(Users *user){
+	std::vector< std::pair<Users*, std::bitset<2> > > :: iterator f = find_user(user);
+	if ( f != _users.end())
+		f->second.reset(CH_VOTE);
 }
 
 void Channels::writeToUsers(std::string text, Users *sender){

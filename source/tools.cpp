@@ -65,6 +65,8 @@ command_base *genCommand(std::string text, bool auth){
 		command  = *tmpV.begin();
 
 	if (auth){
+		if (command == "NICK")
+			return new commNick(text);
 		if (command == "PING")
 			return new commPong(text);
 		else if (command == "PRIVMSG")

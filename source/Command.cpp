@@ -151,6 +151,11 @@ std::string commUser::exec(users_map &users, channels_map &channels_map, void *p
 		error = 461;
 		throw this;
 	}
+	else if (user->isAuth()){
+		reply = makeErrorMsg("", 462);
+		error = 462;
+		throw this;
+	}
 	else{
 		user->setName(args[1]);
 		user->setHostname(args[2]);
@@ -656,3 +661,4 @@ std::string commMODT::exec(users_map &users, channels_map &channels_map, void *p
 	reply = getMOTD(user->getNick());
 	return "";
 }
+

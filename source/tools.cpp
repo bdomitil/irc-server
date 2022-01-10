@@ -67,6 +67,8 @@ command_base *genCommand(std::string text, bool auth){
 	if (auth){
 		if (command == "NICK")
 			return new commNick(text);
+		else if (command == "USER")
+			return new commUser(text);
 		if (command == "PING")
 			return new commPong(text);
 		else if (command == "PRIVMSG")
@@ -117,6 +119,7 @@ std::string makeErrorMsg(std::string info, int error){
 		Errors.insert(std::pair<int, std::string> (444, " :User not logged in"        )  );
 		Errors.insert(std::pair<int, std::string> (451, ":You have not registered"        )  );
 		Errors.insert(std::pair<int, std::string> (461, " :Not enough parameters"        )  );
+		Errors.insert(std::pair<int, std::string> (462, " :You may not reregister"        )  );
 		Errors.insert(std::pair<int, std::string> (464, ":Password incorrect"        )  );
 		Errors.insert(std::pair<int, std::string> (467,  " :Channel key already set"        )  );
 		Errors.insert(std::pair<int, std::string> (471,  " :Cannot join channel (+l)"        )  );

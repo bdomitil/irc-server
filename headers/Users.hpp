@@ -24,6 +24,7 @@ private:
 	Message			message;
 	bool			_isAuth;
 	bool			_isDead;
+	std::string		_awayMsg;
 	
 public:
 	Users		(int fd, t_event *event);
@@ -43,6 +44,7 @@ public:
 	bool		&isIRCoperator(void){return _isIRCoperator;}
 	bool		&isDead(){return _isDead;}
 	int			&getSocket(void){return _socket;}
+	std::string	&getAwayMsg(){return _awayMsg;}
 	std::string	&getNick(void){return _nick;}
 	std::string &getPasswd(void){return _passwd;}
 	std::string &getName(void){return _name;}
@@ -51,8 +53,10 @@ public:
 	std::string &gethostIp(void){return _host_ip;}
 	std::bitset<4> &getflags(){return _flags;};
 	bool		checkFlag(int flag){ return _flags.test(flag);}
+	void		setAwayMsg(std::string awayMsg){_awayMsg = awayMsg;}
 	void		setNick(std::string nick){_nick = nick;}
 	void		setPass(std::string pass){_passwd = pass;}
+	void		kill(){_isDead = true;}
 	void		setaPass(std::string pass){_apasswd = pass;}
 	void		setHostip(std::string hostIp){_host_ip = hostIp;}
 	void		setKevent(t_event *event){_event = event;}

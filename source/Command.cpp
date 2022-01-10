@@ -200,8 +200,15 @@ std::string commPrivMsg::exec(users_map &users, channels_map &channels_map, void
 		reply = makeErrorMsg("PRIVMSG", 461);
 	else if (num_args == 3 && !args[2].size())
 		reply = makeErrorMsg("PRIVMSG", 412);
-	else if (prefix.size())
+	else if (prefix.size() ){
+		if (args[0] == "PRIVMSG" && user->getAwayMsg().size() && args[1][0] != '#'){
+			std::string sender = prefix_to_sender(prefix);
+			if (users.find(sender) != users.end()){
+				users[sender]->writeMessage(makeReplyHeader(SERVER_NAME, sender , 301) + user->getNick() + " :" + user->getAwayMsg());
+			}
+		}
 		reply = request;
+	}
 	else if(args[1][0] != '#') {
 		users_map :: iterator f = users.find(args[1]);
 		if (f == users.end())
@@ -628,6 +635,7 @@ std::string commQuit::exec(users_map &users, channels_map &channels_map, void *p
 	else{
 		channels_map::iterator i = channels_map.begin();
 		close(user->getSocket());
+		user->kill();
 		users.erase(user->getNick());
 		for (; i != channels_map.end(); i++){
 			if (i->second->isPart(user)){
@@ -661,4 +669,31 @@ std::string commMODT::exec(users_map &users, channels_map &channels_map, void *p
 	reply = getMOTD(user->getNick());
 	return "";
 }
+
+
+//#############################################//
+
+commAway::commAway(std::string text): command_base(text) {
+
+
+}
+
+
+std::string commAway::exec(users_map &users, channels_map &channels_map, void *parent){
+	Users *user = (Users*)parent;
+	if (!user)
+		return ("");
+	if (prefix.size() && atoi(args[0].c_str()) == 301)
+		reply = request;
+	else if (num_args == 1){
+		user->getAwayMsg().clear();
+		reply = makeReplyHeader(SERVER_NAME, user->getNick(), 305) + ":You are no longer marked as being away" CR LF;
+	}
+	else if (num_args > 1){
+		user->setAwayMsg(args[1]);
+		reply = makeReplyHeader(SERVER_NAME, user->getNick(), 306) + ":You have been marked as being away" CR LF;
+	}
+	return "";
+}
+
 

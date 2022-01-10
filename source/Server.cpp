@@ -112,26 +112,32 @@ void Server::startLoop(void){
 	while (1){
 		event.update();
 		res = event.proc(&event_list);
-		while (res > 0){
-			if (event_list[res - 1].ident == _sockFd){
+		int i = 0;
+		while (i < res){
+			if (event_list[i].ident == _sockFd){
 				if (!(user = accept_new_user(event)))
 					std::cerr << "ERROR ACCEPTING NEW CONNECTION; PROBLEM :" << strerror(errno) << std::endl;
 			}
-			else if (event_list[res - 1].flags & EV_EOF ){
-				user = static_cast < Users*>(event_list[res - 1].udata);
-				commQuit quit("QUIT :I am tired");
-				quit.exec(users, channels,user);
+			else if (event_list[i].flags & EV_EOF ){
+				user = static_cast < Users*>(event_list[i].udata);
+				if (!user->isDead()){
+					commQuit quit("QUIT :I am tired");
+					quit.exec(users, channels,user);
+				}
 			}
-			else if (event_list[res - 1].filter == EVFILT_READ){
-				user = static_cast < Users*>(event_list[res - 1].udata);
-				user->getMessage(event_list[res - 1].data);
+			else if (event_list[i].filter == EVFILT_READ){
+				user = static_cast < Users*>(event_list[i].udata);
+				if (!user->isDead())
+					user->getMessage(event_list[i].data);
 			}
-			else if (event_list[res - 1].filter == EVFILT_WRITE){
-				user = static_cast < Users*>(event_list[res - 1].udata);
-				user->sendMessage(users, channels, event_list[res - 1].data);
+			else if (event_list[i].filter == EVFILT_WRITE){
+				user = static_cast < Users*>(event_list[i].udata);
+				if (!user->isDead())
+					user->sendMessage(users, channels, event_list[i].data);
 			}
-			res--;
+			i++;
 		}
+		i  = 0;
 		if (res == -1){
 			errors++;
 			std::cerr << "Kevent error #" << errors << std::endl;

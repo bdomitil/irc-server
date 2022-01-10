@@ -70,7 +70,7 @@ void t_event::enableWriteEvent(int socket, void *udata){
 	struct kevent kv = {0};
 	EV_SET(&kv, socket, EVFILT_WRITE, EV_ENABLE, 0 , 0, udata);
 	if (kevent(fd, &kv, 1, NULL, 0, NULL) == -1){
-		std::cerr << "ERROR enabling event for read" << std::endl;
+		std::cerr << "ERROR enabling event for write" << std::endl;
 	}
 }
 

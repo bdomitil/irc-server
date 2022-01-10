@@ -87,6 +87,8 @@ command_base *genCommand(std::string text, bool auth){
 			return new commNames(text);
 		else if (command == "QUIT")
 			return new commQuit(text);
+		else if (command == "AWAY" || command == "301")
+			return new commAway(text);
 	}
 	else{
 		if (command == "NICK")

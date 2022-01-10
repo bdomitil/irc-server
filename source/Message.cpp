@@ -69,7 +69,7 @@ void Message::sendM(int fd, uint64_t writesize){
 			}
 		}
 	}
-	if (_commands.size() == 1 && !_buffer.getStore().size())
+	if (_commands.size() < 2 && !_buffer.getStore().size())
 		reset();
 	else{
 		_isRead = true;

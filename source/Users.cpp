@@ -15,6 +15,7 @@ Users::Users(int fd, t_event *event){
 	_isAuth = false;
 	_isIRCoperator = false;
 	_event = event;
+	_awayMsg.clear();
 	event->addReadEvent(_socket, this);
 	event->addWriteEvent(_socket, this);
 	event->disableWriteEvent(_socket, this);
@@ -31,6 +32,7 @@ void Users::reset(){
 	_flags.reset();
 	_nick.clear();
 	_apasswd.clear();
+	_awayMsg.clear();
 	_hostname.clear();
 	_name.clear();
 	_servername.clear();

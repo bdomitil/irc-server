@@ -61,6 +61,7 @@ void Message::sendM(int fd, uint64_t writesize){
 		if (writesize > _message.size())
 			writesize = _message.size();
 		uint64_t res = send(fd, _message.c_str(), writesize, 0);
+		std::cerr << "REPLY = "<< _message;
 		if (res > 0){
 			_message.erase(0, res);
 			if (_message.size()){

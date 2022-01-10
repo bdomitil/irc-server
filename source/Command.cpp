@@ -179,7 +179,7 @@ std::string commPong::exec(users_map &users, channels_map &channels_map, void *p
 	if (num_args != 2)
 		reply = makeErrorMsg("PING", 461);
 	else
-		reply = "PONG " SERVER_NAME "\n";
+		reply = "PONG " + args[1] + CR LF;
 	return "";
 }
 
@@ -197,9 +197,9 @@ std::string commPrivMsg::exec(users_map &users, channels_map &channels_map, void
 	if (!user)
 		return ("");
 	else if (num_args != 3)
-		reply = makeErrorMsg("PRIVMSG", 461);
+		reply = makeErrorMsg(args[0], 461);
 	else if (num_args == 3 && !args[2].size())
-		reply = makeErrorMsg("PRIVMSG", 412);
+		reply = makeErrorMsg(args[0], 412);
 	else if (prefix.size() ){
 		if (args[0] == "PRIVMSG" && user->getAwayMsg().size() && args[1][0] != '#'){
 			std::string sender = prefix_to_sender(prefix);
@@ -212,20 +212,20 @@ std::string commPrivMsg::exec(users_map &users, channels_map &channels_map, void
 	else if(args[1][0] != '#') {
 		users_map :: iterator f = users.find(args[1]);
 		if (f == users.end())
-			reply = makeErrorMsg("PRIVMSG", 444);
+			reply = makeErrorMsg(args[0], 444);
 		else if ( f->second != user)
-			users[args[1]]->writeMessage(makeMessageHeader(user, "PRIVMSG", args[1]) + args[2]);
+			users[args[1]]->writeMessage(makeMessageHeader(user, args[0], args[1]) + args[2]);
 	}
 	else{
 		channels_map::iterator f = channels_map.begin();
 		if (f == channels_map.end())
-			reply = makeErrorMsg("PRIVMSG", 401);
+			reply = makeErrorMsg(args[0], 401);
 		else if (f->second->getFlags().test(CH_NO_OTHERS) && !f->second->isPart(user))
-			reply = makeErrorMsg("PRIVMSG", 442);
+			reply = makeErrorMsg(args[0], 442);
 		else if (f->second->getFlags().test(CH_MODERATED) && (!f->second->canVote(user) && !f->second->isOper(user)))
 			reply = makeErrorMsg(f->second->getName(), 404);
 		else{
-			f->second->writeToUsers(makeMessageHeader(user, "PRIVMSG", args[1]) + args[2] + CR LF, user);
+			f->second->writeToUsers(makeMessageHeader(user, args[0], args[1]) + args[2] + CR LF, user);
 		}
 	}
 
@@ -637,7 +637,7 @@ std::string commQuit::exec(users_map &users, channels_map &channels_map, void *p
 		close(user->getSocket());
 		user->kill();
 		users.erase(user->getNick());
-		for (; i != channels_map.end(); i++){
+		for (; i != channels_map.end() && channels_map.size(); i++){
 			if (i->second->isPart(user)){
 				reply = makeMessageHeader(user, "QUIT", "") + args[1];
 				i->second->writeToUsers(reply, user);

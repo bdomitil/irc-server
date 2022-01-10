@@ -71,7 +71,7 @@ command_base *genCommand(std::string text, bool auth){
 			return new commUser(text);
 		if (command == "PING")
 			return new commPong(text);
-		else if (command == "PRIVMSG")
+		else if (command == "PRIVMSG" || command == "NOTICE")
 			return new commPrivMsg(text);
 		else if (command == "OPER")
 			return new commOper(text);

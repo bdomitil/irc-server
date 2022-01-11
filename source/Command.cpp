@@ -511,8 +511,8 @@ std::string commJoin::exec(users_map &users, channels_map &channels_map, void *p
 			new_channel->setPassword(args[2]);
 		reply = makeMessageHeader(user, "JOIN", "") + args[1] + CR LF;
 	}
-	else if (channels_map.find(args[1])->second->isPart(user)){
-		reply = prefix + " " + args[0] + " :" + args[1] + CR LF;
+	else if (channels_map.find(args[1])->second->isPart(user) && prefix != ":INVITE"){
+		reply = request;
 		return "";
 	}
 	else{
@@ -521,7 +521,7 @@ std::string commJoin::exec(users_map &users, channels_map &channels_map, void *p
 			error = 461;
 			reply = makeErrorMsg("JOIN", 461);
 			throw this;
-		}else if (channel->getPassword().size() && channel->getPassword() != args[2]){
+		}else if (channel->getPassword().size() && channel->getPassword() != args[2] && prefix != ":INVITE"){
 			error = 475;
 			reply = makeErrorMsg(args[1], 475);
 			throw this;
@@ -531,7 +531,7 @@ std::string commJoin::exec(users_map &users, channels_map &channels_map, void *p
 			reply = makeErrorMsg(args[1], 471);
 			throw this;
 		}
-		else if (channel->getFlags().test(CH_INVITE_ONLY)){
+		else if (channel->getFlags().test(CH_INVITE_ONLY) && prefix != ":INVITE"){
 			error = 473;
 			reply = makeErrorMsg(args[1], 473);
 			throw this;
@@ -635,7 +635,8 @@ std::string commQuit::exec(users_map &users, channels_map &channels_map, void *p
 		close(user->getSocket());
 		user->kill();
 		users.erase(user->getNick());
-		for (; i != channels_map.end() && channels_map.size(); i++){
+		if(channels_map.size())
+		for (; i != channels_map.end(); i++){
 			if (i->second->isPart(user)){
 				reply = makeMessageHeader(user, "QUIT", "") + args[1];
 				i->second->writeToUsers(reply, user);
@@ -722,6 +723,8 @@ std::string commInvite::exec(users_map &users, channels_map &channels_map, void 
 	else if (users[args[1]]->getAwayMsg().size())
 		reply  = makeReplyHeader(SERVER_NAME, user->getNick(), 301) + users[args[1]]->getNick() + " :" +  users[args[1]]->getAwayMsg() + CR LF;
 	else{
+		channels_map[args[2]]->addUser(users[args[1]]);
+		users[args[1]]->getMessage().addCommand(new commJoin(":INVITE JOIN " + args[2]));
 		reply = makeReplyHeader(SERVER_NAME, user->getNick(), 341) + args[1] + " " + args[2] + CR LF;
 		users[args[1]]->writeMessage(makeMessageHeader(user, args[0], args[1]) + args[2]);
 	}

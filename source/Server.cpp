@@ -114,9 +114,11 @@ void Server::startLoop(void){
 		res = event.proc(&event_list);
 		int i = 0;
 		while (i < res){
+			
 			if (event_list[i].ident == _sockFd){
-				if (!(user = accept_new_user(event)))
-					std::cerr << "ERROR ACCEPTING NEW CONNECTION; PROBLEM :" << strerror(errno) << std::endl;
+				for (int j = 0 ;j < event_list[i].data; j++)
+					if (!(user = accept_new_user(event)))
+						std::cerr << "ERROR ACCEPTING NEW CONNECTION; PROBLEM :" << strerror(errno) << std::endl;
 			}
 			else if (event_list[i].flags & EV_EOF ){
 				user = static_cast < Users*>(event_list[i].udata);

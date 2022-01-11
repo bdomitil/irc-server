@@ -13,22 +13,24 @@ Channels::Channels(std::string name, Users *user){
 }
 
 void Channels::addUser(Users* user){
-	std::pair<Users*, std::bitset<2> > new_user;
-	new_user.first = user;
-	new_user.second.reset();
-	_users.push_back(new_user);
+	if (!_users.size() || find_user(user) == _users.end()){
+		std::pair<Users*, std::bitset<2> > new_user;
+		new_user.first = user;
+		new_user.second.reset();
+		_users.push_back(new_user);
+	}	
 }
 
 void Channels::makeOper(Users * user){
 	std::vector< std::pair<Users*, std::bitset<2> > > :: iterator f = find_user(user);
-	if (f != _users.end()){
+	if (f != _users.end() && _users.size()){
 		f->second.set(CH_OPERATOR);
 	}
 }
 
 void Channels::dropOper(Users * user){
 	std::vector< std::pair<Users*, std::bitset<2> > > :: iterator f = find_user(user);
-	if (f != _users.end()){
+	if (f != _users.end() && _users.size()){
 		f->second.reset(CH_OPERATOR);
 	}
 }
@@ -45,7 +47,7 @@ void Channels::changeOwner(){
 
 void Channels::dropUser(Users *user){
 	std::vector< std::pair<Users*, std::bitset<2> > > :: iterator f = find_user(user);
-	if (f != _users.end()){
+	if (f != _users.end() && _users.size()){
 		_users.erase(f);
 		if (_owner == user)
 			changeOwner();
@@ -56,7 +58,7 @@ void Channels::dropUser(Users *user){
 
 void Channels::dropUser(std::string nick){
 	std::vector< std::pair<Users*, std::bitset<2> > > :: iterator f = find_user(nick);
-	if (f != _users.end()){
+	if (f != _users.end() && _users.size()){
 		_users.erase(f);
 		changeOwner();
 	}
@@ -66,7 +68,7 @@ void Channels::dropUser(std::string nick){
 
 bool Channels::isOper(Users *user){
 	std::vector< std::pair<Users*, std::bitset<2> > > :: iterator f = find_user(user);
-	if (f != _users.end()){
+	if (f != _users.end() && _users.size()){
 		return f->second.test(CH_OPERATOR);
 	}
 	return false;
@@ -74,7 +76,7 @@ bool Channels::isOper(Users *user){
 
 bool Channels::isOper(std::string nick){
 	std::vector< std::pair<Users*, std::bitset<2> > > :: iterator f = find_user(nick);
-	if (f != _users.end()){
+	if (f != _users.end() && _users.size()){
 		return f->second.test(CH_OPERATOR);
 	}
 	return false;
@@ -82,14 +84,14 @@ bool Channels::isOper(std::string nick){
 
 bool Channels::isPart(Users *user){
 	std::vector< std::pair<Users*, std::bitset<2> > > :: iterator f = find_user(user);
-	if (f != _users.end())
+	if (f != _users.end() && _users.size())
 		return true;
 	return false;
 }
 
 bool Channels::isPart(std::string nick){
 	std::vector< std::pair<Users*, std::bitset<2> > > :: iterator f = find_user(nick);
-	if (f != _users.end())
+	if (f != _users.end() && _users.size())
 		return true;
 	return false;
 }
@@ -97,6 +99,7 @@ bool Channels::isPart(std::string nick){
 
 void Channels::addBan(std::string nick){
 	std::vector<std::string> :: iterator i = _bans.begin();
+	if (_bans.size())
 	while (i != _bans.end()){
 		if (*i == nick)
 			break;
@@ -108,6 +111,7 @@ void Channels::addBan(std::string nick){
 
 bool Channels::isBaned(Users *user){
 	std::vector<std::string> :: iterator i = _bans.begin();
+	if (_bans.size())
 	while (i != _bans.end()){
 		if (*i == user->getNick())
 			return true;
@@ -118,6 +122,7 @@ bool Channels::isBaned(Users *user){
 
 bool Channels::isBaned(std::string nick){
 	std::vector<std::string> :: iterator i = _bans.begin();
+	if (_bans.size())
 	while (i != _bans.end()){
 		if (*i == nick)
 			return true;
@@ -139,42 +144,44 @@ void Channels::dropBan(std::string ban){
 
 bool Channels::canVote(std::string nick){
 	std::vector< std::pair<Users*, std::bitset<2> > > :: iterator f = find_user(nick);
-	if (f == _users.end())
+	if (f == _users.end() && _users.size())
 		return false;
 	return f->second.test(CH_VOTE);
 }
 
 bool Channels::canVote(Users *user){
 	std::vector< std::pair<Users*, std::bitset<2> > > :: iterator f = find_user(user);
-	if (f == _users.end())
+	if (f == _users.end() && _users.size())
 		return false;
 	return f->second.test(CH_VOTE);
 }
 
 void Channels::addVote(Users *user){
 	std::vector< std::pair<Users*, std::bitset<2> > > :: iterator f = find_user(user);
-	if ( f != _users.end())
+	if ( f != _users.end() && _users.size())
 		f->second.set(CH_VOTE);
 }
 
 void Channels::dropVote(Users *user){
 	std::vector< std::pair<Users*, std::bitset<2> > > :: iterator f = find_user(user);
-	if ( f != _users.end())
+	if ( f != _users.end() && _users.size())
 		f->second.reset(CH_VOTE);
 }
 
 void Channels::writeToUsers(std::string text, Users *sender){
 	std::vector< std::pair<Users*, std::bitset<2> > > :: iterator i = _users.begin();
-	while (i != _users.end()){
-		if (i->first != sender)
-			i->first->writeMessage(text);
-		i++;
-	}
+	if (_users.size())
+		while (i != _users.end()){
+			if (i->first != sender)
+				i->first->writeMessage(text);
+			i++;
+		}
 }
 
 std::string Channels::whoUsers(bool flag_O, bool flag_I, Users *user){
 	std::vector< std::pair<Users*, std::bitset<2> > > :: iterator i = _users.begin();
 	std::string result;
+	if (_users.size())
 	while (i != _users.end()){
 		char q;
 		if (i->first->isIRCoperator())
@@ -217,8 +224,9 @@ std::string Channels::whoUsers(bool flag_O, bool flag_I, Users *user){
 std::string Channels::userNames(Users *user){
 	std::vector< std::pair<Users*, std::bitset<2> > > :: iterator i = _users.begin();
 	std::string result;
-	if (i != _users.end())
+	if (i != _users.end() && _users.size())
 		result = makeReplyHeader(SERVER_NAME, user->getNick(), 353) + "= " + getName() + " :";
+	if (_users.size())
 	while (i != _users.end()){
 		if (isOper(i->first))
 			result += "@" + i->first->getNick() + " ";
@@ -233,7 +241,8 @@ std::string Channels::userNames(Users *user){
 
 std::vector< std::pair<Users*, std::bitset<2> > > :: iterator Channels::find_user(Users *user ){
 	std::vector< std::pair<Users*, std::bitset<2> > > :: iterator i = _users.begin();
-	while (i != _users.end() && _users.size()){
+	if(_users.size())
+	while (i != _users.end()){
 		 if (user == i->first)
 		 	return i;
 		i++;
@@ -243,6 +252,7 @@ std::vector< std::pair<Users*, std::bitset<2> > > :: iterator Channels::find_use
 
 std::vector< std::pair<Users*, std::bitset<2> > > :: iterator Channels::find_user(std::string nick){
 	std::vector< std::pair<Users*, std::bitset<2> > > :: iterator i = _users.begin();
+	if(_users.size())
 	while (i != _users.end()){
 		 if (nick == i->first->getNick())
 		 	return i;

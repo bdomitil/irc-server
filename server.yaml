@@ -1,3 +1,6 @@
 operator:
       login : bdomitil
-      passwd: 12345678
+      passwd : 12345678
+operato:
+      login : second
+      passwd : 12312312

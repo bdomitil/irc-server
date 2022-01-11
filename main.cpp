@@ -3,7 +3,7 @@
 int main(int argc, char **argv){
 	if (argc != 3){
 		std::cerr << "ERROR IN ARGS" << std::endl;
-		std::cerr << "TRY: ./irc-server [port] [passord]" << std::endl;
+		std::cerr << "TRY: ./irc-server [port] [password]" << std::endl;
 		return (1);
 	}
 	try{

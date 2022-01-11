@@ -229,7 +229,7 @@ std::string commPrivMsg::exec(users_map &users, channels_map &channels_map, void
 			users[args[1]]->writeMessage(makeMessageHeader(user, args[0], args[1]) + args[2]);
 	}
 	else{
-		channels_map::iterator f = channels_map.begin();
+		channels_map::iterator f = channels_map.find(args[1]);
 		if (f == channels_map.end())
 			reply = makeErrorMsg(args[0], 401);
 		else if (f->second->getFlags().test(CH_NO_OTHERS) && !f->second->isPart(user))

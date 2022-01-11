@@ -5,6 +5,7 @@ Channels::Channels(std::string name, Users *user){
 	_name = name;
 	_size = 0;
 	_flags.reset();
+	_flags.set(CH_NO_OTHERS);
 	_max_users = 0;
 	_isDead = false;
 	_users.reserve(100);

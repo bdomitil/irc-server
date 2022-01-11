@@ -125,6 +125,7 @@ void Server::startLoop(void){
 				if (!user->isDead()){
 					commQuit quit("QUIT :I am tired");
 					quit.exec(users, channels,user);
+					close(event_list[i].ident);
 				}
 			}
 			else if (event_list[i].filter == EVFILT_READ){

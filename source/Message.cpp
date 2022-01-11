@@ -11,7 +11,7 @@ void Message::reset(){
 	_isRead = false;
 	_isSend = true;
 	_message.clear();
-	for (int i = 0;i < _commands.size(); i++)
+	for (uint32_t i = 0;i < _commands.size(); i++)
 		delete _commands[i];
 	_commands.clear();
 }

@@ -31,7 +31,7 @@ int getArgs(std::string &text, std::vector<std::string> &arg_store){
 	}
 	if (text[i] == ':')
 		text.erase(i, 1);
-	if (num && num != arg_store.size())
+	if (num && (uint32_t)num != arg_store.size())
 		arg_store.insert(arg_store.end(), std::string(text));
 	text.erase(0, i);
 	strtrim(text);
@@ -58,6 +58,7 @@ void command_base::reset(){
 
 
 std::string commNick::exec(users_map &users, channels_map &channels_map, void *parent){
+	(void)channels_map;
 	Users *user = (Users*)parent;
 	if (!user)
 		return ("");
@@ -92,6 +93,9 @@ commNotFound::commNotFound(std::string text): command_base(text) {
 }
 
 std::string commNotFound::exec(users_map &users, channels_map &channels_map, void *parent){
+	(void)parent;
+	(void)users;
+	(void)channels_map;
 	reply = makeErrorMsg(args[0], 421);
 	std::cerr << reply << std::endl; //TODO debug
 	return ("");
@@ -105,6 +109,9 @@ commNonAuth::commNonAuth(std::string text): command_base(text) {
 
 
 std::string commNonAuth::exec(users_map &users, channels_map &channels_map, void *parent){
+	(void)parent;
+	(void)users;
+	(void)channels_map;
 	reply = makeErrorMsg("AUTH", 451);
 	return "";
 }
@@ -117,6 +124,8 @@ commPass::commPass(std::string text): command_base(text) {
 
 std::string commPass::exec(users_map &users, channels_map &channels_map, void *parent){
 	
+	(void)users;
+	(void)channels_map;
 	Users *user = (Users*)parent;
 	if (!user)
 		return ("");
@@ -142,7 +151,8 @@ commUser::commUser(std::string text): command_base(text) {
 
 
 std::string commUser::exec(users_map &users, channels_map &channels_map, void *parent){
-	
+	(void) channels_map;
+	(void) users;
 	Users *user = (Users*)parent;
 	if (!user)
 		return ("");;
@@ -173,6 +183,8 @@ commPong::commPong(std::string text): command_base(text) {
 
 
 std::string commPong::exec(users_map &users, channels_map &channels_map, void *parent){
+		(void) channels_map;
+	(void) users;
 	Users *user = (Users*)parent;
 	if (!user)
 		return ("");
@@ -241,6 +253,8 @@ commOper::commOper(std::string text): command_base(text) {
 
 
 std::string commOper::exec(users_map &users, channels_map &channels_map, void *parent){
+		(void) channels_map;
+	(void) users;
 	Users *user = (Users*)parent;
 	if (!user)
 		return ("");
@@ -493,6 +507,8 @@ commJoin::commJoin(std::string text): command_base(text) {
 
 
 std::string commJoin::exec(users_map &users, channels_map &channels_map, void *parent){
+		(void) channels_map;
+	(void) users;
 	Users *user = (Users*)parent;
 	if (!user)
 		return ("");
@@ -558,6 +574,8 @@ commTopic::commTopic(std::string text): command_base(text) {
 
 
 std::string commTopic::exec(users_map &users, channels_map &channels_map, void *parent){
+		(void) channels_map;
+	(void) users;
 	Users *user = (Users*)parent;
 	if (!user)
 		return ("");
@@ -594,6 +612,8 @@ commNames::commNames(std::string text): command_base(text) {
 
 
 std::string commNames::exec(users_map &users, channels_map &channels_map, void *parent){
+	(void) channels_map;
+	(void) users;
 	Users *user = (Users*)parent;
 	if (!user)
 		return ("");
@@ -662,6 +682,8 @@ commMODT::commMODT(std::string text): command_base(text) {
 
 
 std::string commMODT::exec(users_map &users, channels_map &channels_map, void *parent){
+		(void) channels_map;
+	(void) users;
 	Users *user = (Users*)parent;
 	if (!user)
 		return ("");
@@ -679,6 +701,8 @@ commAway::commAway(std::string text): command_base(text) {
 
 
 std::string commAway::exec(users_map &users, channels_map &channels_map, void *parent){
+		(void) channels_map;
+	(void) users;
 	Users *user = (Users*)parent;
 	if (!user)
 		return ("");
@@ -741,6 +765,8 @@ commKick::commKick(std::string text): command_base(text) {
 
 
 std::string commKick::exec(users_map &users, channels_map &channels_map, void *parent){
+	(void) channels_map;
+	(void) users;
 	Users *user = (Users*)parent;
 	if (!user)
 		return ("");
@@ -781,6 +807,8 @@ commPart::commPart(std::string text): command_base(text) {
 
 
 std::string commPart::exec(users_map &users, channels_map &channels_map, void *parent){
+	(void) channels_map;
+	(void) users;
 	Users *user = (Users*)parent;
 	if (!user)
 		return ("");
@@ -816,6 +844,8 @@ commList::commList(std::string text): command_base(text) {
 
 
 std::string commList::exec(users_map &users, channels_map &channels_map, void *parent){
+	(void) channels_map;
+	(void) users;
 	Users *user = (Users*)parent;
 	if (!user)
 		return ("");

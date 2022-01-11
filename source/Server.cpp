@@ -115,7 +115,7 @@ void Server::startLoop(void){
 		int i = 0;
 		while (i < res){
 			
-			if (event_list[i].ident == _sockFd){
+			if (event_list[i].ident == (unsigned int)_sockFd){
 				for (int j = 0 ;j < event_list[i].data; j++)
 					if (!(user = accept_new_user(event)))
 						std::cerr << "ERROR ACCEPTING NEW CONNECTION; PROBLEM :" << strerror(errno) << std::endl;

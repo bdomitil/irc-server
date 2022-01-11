@@ -25,7 +25,7 @@ void t_event::update(){
 }
 
 void t_event::addReadEvent(int socket, void *udata){
-	struct kevent kv = {0};
+	struct kevent kv ;
 	EV_SET(&kv, socket, EVFILT_READ, EV_ADD, 0 , 0, udata);
 	if (kevent(fd, &kv, 1, NULL, 0, NULL) == -1){
 		std::cerr << "ERROR adding event for write" << std::endl;
@@ -34,7 +34,7 @@ void t_event::addReadEvent(int socket, void *udata){
 }
 
 void t_event::addWriteEvent(int socket, void *udata){
-	struct kevent kv = {0};
+	struct kevent kv ;
 	EV_SET(&kv, socket, EVFILT_WRITE, EV_ADD , 0 , 0, udata);
 	if (kevent(fd, &kv, 1, NULL, 0, NULL) == -1){
 		std::cerr << "ERROR adding event for write" << std::endl;
@@ -43,7 +43,7 @@ void t_event::addWriteEvent(int socket, void *udata){
 }
 
 void t_event::disableWriteEvent(int socket, void *udata){
-	struct kevent kv = {0};
+	struct kevent kv ;
 	EV_SET(&kv, socket, EVFILT_WRITE, EV_DISABLE, 0 , 0, udata);
 	if (kevent(fd, &kv, 1, NULL, 0, NULL) == -1){
 		std::cerr << "ERROR disabling event for write" << std::endl;
@@ -51,7 +51,7 @@ void t_event::disableWriteEvent(int socket, void *udata){
 }
 
 void t_event::disableReadEvent(int socket, void *udata){
-	struct kevent kv = {0};
+	struct kevent kv ;
 	EV_SET(&kv, socket, EVFILT_READ, EV_DISABLE, 0 , 0, udata);
 	if (kevent(fd, &kv, 1, NULL, 0, NULL) == -1){
 		std::cerr << "ERROR disabling event for read" << std::endl;
@@ -59,7 +59,7 @@ void t_event::disableReadEvent(int socket, void *udata){
 }
 
 void t_event::enableReadEvent(int socket, void *udata){
-	struct kevent kv = {0};
+	struct kevent kv ;
 	EV_SET(&kv, socket, EVFILT_READ, EV_ENABLE, 0 , 0, udata);
 	if (kevent(fd, &kv, 1, NULL, 0, NULL) == -1){
 		std::cerr << "ERROR enabling event for read" << std::endl;
@@ -67,7 +67,7 @@ void t_event::enableReadEvent(int socket, void *udata){
 }
 
 void t_event::enableWriteEvent(int socket, void *udata){
-	struct kevent kv = {0};
+	struct kevent kv ;
 	EV_SET(&kv, socket, EVFILT_WRITE, EV_ENABLE, 0 , 0, udata);
 	if (kevent(fd, &kv, 1, NULL, 0, NULL) == -1){
 		std::cerr << "ERROR enabling event for write" << std::endl;
@@ -76,7 +76,7 @@ void t_event::enableWriteEvent(int socket, void *udata){
 
 int	t_event::proc(struct kevent **list){
 	int res = -1;
-	struct timespec timeout = {0};
+	struct timespec timeout ;
 
 	set_time(2.5, timeout);
 	res = kevent(fd, nullptr, 0, event_list, len + 10, &timeout);

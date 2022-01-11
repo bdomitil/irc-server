@@ -174,7 +174,7 @@ std::time_t increase_session_time(){
 }
 
 std::string prefix_to_sender(std::string &prefix){
-	int pos ;
+	uint64_t pos ;
 	pos = prefix.find('!');
 	if (pos != std::string::npos){
 		return  prefix.substr(1, pos -1);

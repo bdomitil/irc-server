@@ -25,6 +25,7 @@ public:
 			catch(std::exception &e){
 				std::cerr << e.what()<< std::endl;
 			}
+			memset(_buff, 0, x);
 			_status = BUFF_AVAIL;
 			_readSize = readSize;
 			_len = 0;
@@ -36,13 +37,14 @@ public:
 			catch(std::exception &e){
 				std::cerr << e.what()<< std::endl;
 			}
+			memset(_buff, 0, x);
 			_status = BUFF_AVAIL;
 			_readSize = 2048;
 			_len = 0;
 		}
 		
 		void reset(){
-			memset(_buff, 0, _len);
+			memset(_buff, 0, x);
 			_len = 0;
 			_status = BUFF_AVAIL;
 		}

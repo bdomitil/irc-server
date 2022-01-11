@@ -509,8 +509,6 @@ std::string commJoin::exec(users_map &users, channels_map &channels_map, void *p
 		channels_map[args[1]] = new_channel;
 		if (num_args == 3)
 			new_channel->setPassword(args[2]);
-		//call TOPIC
-		//call NAMES
 		reply = makeMessageHeader(user, "JOIN", "") + args[1] + CR LF;
 	}
 	else if (channels_map.find(args[1])->second->isPart(user)){
@@ -683,7 +681,7 @@ std::string commAway::exec(users_map &users, channels_map &channels_map, void *p
 	Users *user = (Users*)parent;
 	if (!user)
 		return ("");
-	if (prefix.size() && atoi(args[0].c_str()) == 301)
+	if (prefix.size() && args[0] == "301")
 		reply = request;
 	else if (num_args == 1){
 		user->getAwayMsg().clear();
@@ -692,6 +690,40 @@ std::string commAway::exec(users_map &users, channels_map &channels_map, void *p
 	else if (num_args > 1){
 		user->setAwayMsg(args[1]);
 		reply = makeReplyHeader(SERVER_NAME, user->getNick(), 306) + ":You have been marked as being away" CR LF;
+	}
+	return "";
+}
+
+
+//#############################################//
+
+commInvite::commInvite(std::string text): command_base(text) {
+
+
+}
+
+
+std::string commInvite::exec(users_map &users, channels_map &channels_map, void *parent){
+	Users *user = (Users*)parent;
+	if (!user)
+		return ("");
+	if (prefix.size())
+		reply = request;
+	else if (num_args < 3)
+		reply = makeErrorMsg(args[0], 461);
+	else if (users.find(args[1]) == users.end() || channels_map.find(args[2]) == channels_map.end())
+		reply = makeErrorMsg(args[2], 401);
+	else if (!channels_map[args[2]]->isPart(user->getNick()))
+		reply = makeErrorMsg(args[2], 442);
+	else if (!channels_map[args[2]]->getFlags().test(CH_INVITE_ONLY) && !channels_map[args[2]]->isOper(user->getNick()))
+		reply = makeErrorMsg(args[2], 482);
+	else if (channels_map[args[2]]->isPart(args[1]))
+		reply = makeErrorMsg(args[1] + " " + args[2], 443);
+	else if (users[args[1]]->getAwayMsg().size())
+		reply  = makeReplyHeader(SERVER_NAME, user->getNick(), 301) + users[args[1]]->getNick() + " :" +  users[args[1]]->getAwayMsg() + CR LF;
+	else{
+		reply = makeReplyHeader(SERVER_NAME, user->getNick(), 341) + args[1] + " " + args[2] + CR LF;
+		users[args[1]]->writeMessage(makeMessageHeader(user, args[0], args[1]) + args[2]);
 	}
 	return "";
 }

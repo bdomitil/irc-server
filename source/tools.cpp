@@ -89,6 +89,8 @@ command_base *genCommand(std::string text, bool auth){
 			return new commQuit(text);
 		else if (command == "AWAY" || command == "301")
 			return new commAway(text);
+		else if (command == "INVITE")
+			return new commInvite(text);
 	}
 	else{
 		if (command == "NICK")

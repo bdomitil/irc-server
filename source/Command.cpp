@@ -466,7 +466,7 @@ std::string commWho::exec(users_map &users, channels_map &channels_map, void *pa
 	}
 	else if (args[1] == "*"){
 		channels_map::iterator i = channels_map.begin();
-		while (i != channels_map.end()){
+		while (channels_map.size() && i != channels_map.end()){
 			reply += i->second->whoUsers(false, true, user);
 			i++;
 		}
@@ -601,7 +601,7 @@ std::string commNames::exec(users_map &users, channels_map &channels_map, void *
 		reply = makeErrorMsg("NAME", 461);
 		error = 461;
 		throw this;
-	}else if(channels_map.find(args[1]) != channels_map.end() &&
+	}else if(channels_map.size() && channels_map.find(args[1]) != channels_map.end() &&
 	! channels_map[args[1]]->getFlags().test(CH_SECRET)	 && 
 	! channels_map[args[1]]->getFlags().test(CH_PRIVATE) ){
 			reply = channels_map[args[1]]->userNames(user);
@@ -821,7 +821,7 @@ std::string commList::exec(users_map &users, channels_map &channels_map, void *p
 	channels_map :: iterator i = channels_map.begin();
 	if (num_args > 1)
 		i = channels_map.find(args[1]);
-	while (i != channels_map.end()){
+	while (channels_map.size() && i != channels_map.end()){
 		if (i->second->getFlags().test(CH_SECRET) && !i->second->isPart(user))
 			(void)2;
 		else if (i->second->getFlags().test(CH_PRIVATE) && !i->second->isPart(user))

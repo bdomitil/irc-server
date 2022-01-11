@@ -14,7 +14,7 @@ void t_event::update(){
 	if (update_len != len){
 		try{
 			delete [] event_list;
-			event_list = new struct kevent[update_len];
+			event_list = new struct kevent[update_len + 10];
 		}
 		catch(std::exception &e){
 		std::cerr << e.what() << std::endl;
@@ -79,7 +79,7 @@ int	t_event::proc(struct kevent **list){
 	struct timespec timeout = {0};
 
 	set_time(2.5, timeout);
-	res = kevent(fd, nullptr, 0, event_list, len, &timeout);
+	res = kevent(fd, nullptr, 0, event_list, len + 10, &timeout);
 	*list = event_list;
 	return res;
 }

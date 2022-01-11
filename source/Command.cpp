@@ -729,3 +729,43 @@ std::string commInvite::exec(users_map &users, channels_map &channels_map, void 
 }
 
 
+//#############################################//
+
+commKick::commKick(std::string text): command_base(text) {
+
+
+}
+
+
+std::string commKick::exec(users_map &users, channels_map &channels_map, void *parent){
+	Users *user = (Users*)parent;
+	if (!user)
+		return ("");
+	if (prefix.size())
+		reply = request;
+	else if (num_args < 3)
+		reply = makeErrorMsg(args[0], 461);
+	else if (channels_map.find(args[1]) == channels_map.end())
+		reply = makeErrorMsg(args[1], 403);
+	else if (!channels_map[args[1]]->isPart(user->getNick()))
+		reply = makeErrorMsg(args[1], 442);
+	else if (!channels_map[args[1]]->isOper(user->getNick()))
+		reply = makeErrorMsg(args[1], 482);
+	else{
+		if (args[2][args[2].size() - 1] == ',')
+			args[2].pop_back();
+		if (num_args == 4)
+			reply = makeMessageHeader(user, "KICK", args[1] + " " + args[2]) + args[3] + CR LF;
+		else
+			reply = makeMessageHeader(user, "KICK", args[1] + " " + args[2]) + CR LF;
+		channels_map[args[1]]->writeToUsers(reply, user);
+		channels_map[args[1]]->dropUser(args[2]);
+		if (channels_map[args[1]]->isDead()){
+			delete channels_map[args[1]];
+			channels_map.erase(args[1]);
+		}
+	}
+	return "";
+}
+
+

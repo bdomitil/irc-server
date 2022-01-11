@@ -104,6 +104,7 @@ void Server::startLoop(void){
 
 	int res = -2;
 	int errors = 0;
+	channels["ad12easkdk'2csfd2sdf[ok234ok;sdf"] = nullptr;
 	struct kevent *event_list;
 	Users *user = nullptr;
 

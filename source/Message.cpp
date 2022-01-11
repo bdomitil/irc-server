@@ -60,6 +60,8 @@ void Message::sendM(int fd, uint64_t writesize){
 	if (_message.size()){
 		if (writesize > _message.size())
 			writesize = _message.size();
+		if (_message.find('\r') != std::string::npos)
+			_message.erase(_message.find('\r'), 1);
 		uint64_t res = send(fd, _message.c_str(), writesize, 0);
 		std::cerr << "REPLY = "<< _message;
 		if (res > 0){

@@ -17,12 +17,12 @@ std::string getValue(std::string &str){
 
 std::string strtrim(std::string &str){
 	std::string:: iterator i = str.begin();
-	while (i != str.end() && ((*i >= 0 && *i <= 32) || *i == 127)){
+	while (isspace(*i)){
 		str.erase(i);
 		i = str.begin();
 	}
 	i = str.end() - 1;
-	while (*i && i != str.begin() && ((*i >= 0 && *i <= 32) || *i == 127)){
+	while (isspace(*i)){
 		str.erase(i);
 		i = str.end() - 1;
 	}
@@ -91,6 +91,8 @@ command_base *genCommand(std::string text, bool auth){
 			return new commAway(text);
 		else if (command == "INVITE")
 			return new commInvite(text);
+		else if (command == "KICK")
+			return new commKick(text);
 	}
 	else{
 		if (command == "NICK")

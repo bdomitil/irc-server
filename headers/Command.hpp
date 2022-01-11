@@ -202,6 +202,25 @@ class commKick : public command_base{
 		std::string exec(users_map &users_map, channels_map &channels_map, void *parent);
 };
 
+//#############################################//
+
+
+class commList : public command_base{
+
+	public:
+		commList(std::string text);
+		std::string exec(users_map &users_map, channels_map &channels_map, void *parent);
+};
+
+//#############################################//
+
+
+class commPart : public command_base{
+
+	public:
+		commPart(std::string text);
+		std::string exec(users_map &users_map, channels_map &channels_map, void *parent);
+};
 
 
 

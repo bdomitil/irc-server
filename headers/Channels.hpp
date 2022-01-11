@@ -43,7 +43,7 @@ public:
 	void			setTopic(std::string topic){_topic = topic;}
 	void			setPassword(std::string password){_password = password;}
 	Users* 			getOwner(){return _owner;}
-	uint64_t		size(){return _size;}
+	uint64_t		size(){return _users.size();}
 	bool			isDead(){return _isDead;}
 	void			setMax(uint64_t x){_max_users = x;}
 	bool			isOper(Users *user);

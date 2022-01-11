@@ -769,3 +769,72 @@ std::string commKick::exec(users_map &users, channels_map &channels_map, void *p
 }
 
 
+//#############################################//
+
+commPart::commPart(std::string text): command_base(text) {
+
+
+}
+
+
+std::string commPart::exec(users_map &users, channels_map &channels_map, void *parent){
+	Users *user = (Users*)parent;
+	if (!user)
+		return ("");
+	if (prefix.size())
+		reply  = request;
+	else if (num_args < 2)
+		reply = makeErrorMsg(args[0], 461);
+	else if (channels_map.find(args[1]) == channels_map.end())
+		reply = makeErrorMsg(args[1], 403);
+	else if (!channels_map[args[1]]->isPart(user->getNick()))
+		reply = makeErrorMsg(args[1], 442);
+	else{
+		reply = makeMessageHeader(user, args[0], args[1]);
+		reply.pop_back();
+		reply.pop_back();
+		reply += CR LF;
+		channels_map[args[1]]->writeToUsers(reply, user);
+		channels_map[args[1]]->dropUser(user);
+		if (channels_map[args[1]]->isDead()){
+			delete channels_map[args[1]];
+			channels_map.erase(args[1]);
+		}
+	}
+	return "";
+}
+
+//#############################################//
+
+commList::commList(std::string text): command_base(text) {
+
+
+}
+
+
+std::string commList::exec(users_map &users, channels_map &channels_map, void *parent){
+	Users *user = (Users*)parent;
+	if (!user)
+		return ("");
+	reply = makeReplyHeader(SERVER_NAME, user->getNick(),321) + "Channel  :Users Name" CR LF;
+	std::string end = makeReplyHeader(SERVER_NAME, user->getNick(),323) + "End of /LIST" CR LF;
+	channels_map :: iterator i = channels_map.begin();
+	if (num_args > 1)
+		i = channels_map.find(args[1]);
+	while (i != channels_map.end()){
+		if (i->second->getFlags().test(CH_SECRET) && !i->second->isPart(user))
+			(void)2;
+		else if (i->second->getFlags().test(CH_PRIVATE) && !i->second->isPart(user))
+			reply += makeReplyHeader(SERVER_NAME, user->getNick(),322) + \
+				"Prv " + ft_itoa(i->second->size()) + " :[+n]" CR LF;
+		else
+			reply += makeReplyHeader(SERVER_NAME, user->getNick(),322) + \
+				i->second->getName() + " " + ft_itoa(i->second->size()) + " :[+n] " + i->second->getTopic() + CR LF;
+		if (num_args == 1)
+			i++;
+		else
+			i = channels_map.end();
+	}
+	reply += end;
+	return "";
+}

@@ -45,9 +45,10 @@ void Channels::changeOwner(){
 
 void Channels::dropUser(Users *user){
 	std::vector< std::pair<Users*, std::bitset<2> > > :: iterator f = find_user(user);
-	if (f != _users.end() && _owner == user){
+	if (f != _users.end()){
 		_users.erase(f);
-		changeOwner();
+		if (_owner == user)
+			changeOwner();
 	}
 	if (!_users.size())
 		_isDead = true;

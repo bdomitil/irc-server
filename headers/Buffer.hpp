@@ -74,7 +74,6 @@ public:
 		void readFromSocket(int socket, uint64_t readSize){
 			int res = -2;
 			res = recv(socket, &(_buff[_len]), readSize, 0);
-			std::cerr << "REQUEST = " << _buff;
 			if (res == -1)
 				throw BUFF_ERROR;
 			_len += res;

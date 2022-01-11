@@ -93,6 +93,10 @@ command_base *genCommand(std::string text, bool auth){
 			return new commInvite(text);
 		else if (command == "KICK")
 			return new commKick(text);
+		else if (command == "PART")
+			return new commPart(text);
+		else if (command == "LIST")
+			return new commList(text);
 	}
 	else{
 		if (command == "NICK")
